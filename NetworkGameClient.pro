@@ -29,3 +29,5 @@ HEADERS  += mainwindow.h \
     Display.h \
     Noise2D.h \
     defines.h
+
+RESOURCES = resources.qrc

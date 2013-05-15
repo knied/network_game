@@ -157,7 +157,7 @@ void GameView::initializeGL()
     _program_identifier = glCreateProgram();
 
     QImage img;
-    if (!img.load("8x8tiles.png")) {
+    if (!img.load(":/8x8tiles.png")) {
         std::cout << "image not found!" << std::endl;
     }
 
