@@ -7,7 +7,6 @@
 //
 
 #include "Display.h"
-#include "defines.h"
 
 Display::Display(int width, int height,
                  int position_x, int position_y, int position_z,
@@ -22,75 +21,49 @@ Display::Display(int width, int height,
             set_navigation(x, y, NAV_UNKNOWN);
             
             if (world.visible(x_index, y_index, position_z, position_x, position_y, position_z)) {
-                // sight is clear
-                if (world.at(x_index, y_index, position_z) == TILE_VOID) {
-                    // this level is clear
-                    if (world.at(x_index, y_index, position_z - 1) == TILE_VOID) {
-                        // this is below us
-                        if (world.at(x_index, y_index, position_z - 2) == TILE_VOID) {
-                            // its far below us
-                            set_navigation(x, y, NAV_FALL);
-                            bool ground_found = false;
-                            for (int i = 3; position_z - i >= 0; ++i) {
-                                if (world.at(x_index, y_index, position_z - i) != TILE_VOID) {
-                                    if (world.at(x_index, y_index, position_z - i) == TILE_WATER &&
-                                        world.at(x_index, y_index, position_z - i - 1) == TILE_WATER) {
-                                        set_tile(x, y, TILE_DEEP_WATER);
-                                    } else {
-                                        set_tile(x, y, world.at(x_index, y_index, position_z - i));
-                                    }
-                                    ground_found = true;
-                                    break;
-                                }
-                            }
-                            if (!ground_found) {
-                                set_navigation(x, y, NAV_UNKNOWN);
-                            }
-                        } else {
-                            // its right below us
-                            set_navigation(x, y, NAV_DOWN);
-                            if (world.at(x_index, y_index, position_z - 2) == TILE_WATER &&
-                                world.at(x_index, y_index, position_z - 3) == TILE_WATER) {
-                                set_tile(x, y, TILE_DEEP_WATER);
-                            } else {
-                                set_tile(x, y, world.at(x_index, y_index, position_z - 2));
-                            }
-                        }
-                    } else {
-                        // its on the same level
-                        set_navigation(x, y, NAV_LEVEL);
-                        if (world.at(x_index, y_index, position_z - 1) == TILE_WATER &&
-                            world.at(x_index, y_index, position_z - 2) == TILE_WATER) {
+                // determine which block to show
+                int i = 0;
+                for (; position_z - i >= 0; ++i) {
+                    if (world.at(x_index, y_index, position_z - i) != TILE_VOID) {
+                        if (world.at(x_index, y_index, position_z - i) == TILE_WATER &&
+                            world.at(x_index, y_index, position_z - i - 1) == TILE_WATER) {
                             set_tile(x, y, TILE_DEEP_WATER);
                         } else {
-                            set_tile(x, y, world.at(x_index, y_index, position_z - 1));
+                            set_tile(x, y, world.at(x_index, y_index, position_z - i));
                         }
+                        break;
                     }
+                }
+                if (position_z - i < 0) {
+                    // no ground
+                    set_navigation(x, y, NAV_UNKNOWN);
                 } else {
-                    // this level is blocked
-                    if (world.at(x_index, y_index, position_z + 1) == TILE_VOID) {
-                        // we can go up
-                        if (world.at(x_index-1, y_index, position_z) == TILE_VOID ||
-                            world.at(x_index+1, y_index, position_z) == TILE_VOID ||
-                            world.at(x_index, y_index-1, position_z) == TILE_VOID ||
-                            world.at(x_index, y_index+1, position_z) == TILE_VOID) {
-                            set_navigation(x, y, NAV_UP);
-                            set_tile(x, y, world.at(x_index, y_index, position_z));
+                    // can we go that way?
+                    if (enterable(world.at(x_index, y_index, position_z))) {
+                        // we could
+                        // is this a ladder?
+                        if (world.at(x_index, y_index, position_z) == TILE_LADDER) {
+                            // it is a ladder
+                            set_navigation(x, y, NAV_LEVEL);
                         } else {
-                            set_navigation(x, y, NAV_UNKNOWN);
-                            set_tile(x, y, TILE_VOID);
+                            // this is not a ladder, could we fall?
+                            if (world.at(x_index, y_index, position_z - 1) == TILE_VOID) {
+                                // we would fall
+                                set_navigation(x, y, NAV_FALL);
+                            } else {
+                                // we can walk here
+                                set_navigation(x, y, NAV_LEVEL);
+                            }
                         }
                     } else {
-                        // this way is blocked
-                        if (world.at(x_index-1, y_index, position_z) == TILE_VOID ||
-                            world.at(x_index+1, y_index, position_z) == TILE_VOID ||
-                            world.at(x_index, y_index-1, position_z) == TILE_VOID ||
-                            world.at(x_index, y_index+1, position_z) == TILE_VOID) {
-                            set_navigation(x, y, NAV_BLOCKED);
-                            set_tile(x, y, world.at(x_index, y_index, position_z));
+                        // this level is blocked
+                        // can we go up?
+                        if (enterable(world.at(x_index, y_index, position_z + 1))) {
+                            // we can go up
+                            set_navigation(x, y, NAV_UP);
                         } else {
-                            set_navigation(x, y, NAV_UNKNOWN);
-                            set_tile(x, y, TILE_VOID);
+                            // this way is blocked
+                            set_navigation(x, y, NAV_BLOCKED);
                         }
                     }
                 }

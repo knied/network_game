@@ -51,6 +51,41 @@ World::World(int width, int height, int depth)
             }
         }
     }
+
+    // place a random dungeon :)
+    bool found = false;
+    while(!found) {
+        int dungeon_x = rand() % _width;
+        int dungeon_y = rand() % _height;
+        // find the surface at this position
+        int i = 0;
+        for (; i < _depth; ++i) {
+            if (at(dungeon_x, dungeon_y, i) == TILE_VOID) {
+                if (at(dungeon_x, dungeon_y, i-1) != TILE_WATER) {
+                    found = true;
+                }
+                break;
+            }
+        }
+
+        if (!found) {
+            continue;
+        }
+
+        // make a room
+        for (int y = -5; y < 5; ++y) {
+            for (int x = -5; x < 5; ++x) {
+                set(x + dungeon_x, y + dungeon_y, i - 16, TILE_VOID);
+            }
+        }
+
+        // create a ladder
+        for (int j = 0; j < 16; ++j) {
+            set(dungeon_x, dungeon_y, i - j - 1, TILE_LADDER);
+        }
+
+        std::cout << "placed a dungeon at: " << dungeon_x << " " << dungeon_y << std::endl;
+    }
 }
 
 unsigned char World::at(int x, int y, int z) const {
@@ -87,13 +122,13 @@ bool World::visible(const int x, const int y, const int z,
         int current_y = from_y;
         if (dy > 0) {
             for (; current_y < y; ++current_y) {
-                if (at(current_x, current_y, from_z) != TILE_VOID) {
+                if (!transparent(at(current_x, current_y, from_z))) {
                     return false;
                 }
             }
         } else if (dy < 0) {
             for (; current_y > y; --current_y) {
-                if (at(current_x, current_y, from_z) != TILE_VOID) {
+                if (!transparent(at(current_x, current_y, from_z))) {
                     return false;
                 }
             }
@@ -126,7 +161,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(current_x, current_y, from_z) != TILE_VOID) {
+                if (!transparent(at(current_x, current_y, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -160,7 +195,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(current_y, current_x, from_z) != TILE_VOID) {
+                if (!transparent(at(current_y, current_x, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -196,7 +231,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(-current_y, current_x, from_z) != TILE_VOID) {
+                if (!transparent(at(-current_y, current_x, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -230,7 +265,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(-current_x, current_y, from_z) != TILE_VOID) {
+                if (!transparent(at(-current_x, current_y, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -266,7 +301,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(current_x, -current_y, from_z) != TILE_VOID) {
+                if (!transparent(at(current_x, -current_y, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -300,7 +335,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(current_y,-current_x, from_z) != TILE_VOID) {
+                if (!transparent(at(current_y,-current_x, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -337,7 +372,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(-current_y, -current_x, from_z) != TILE_VOID) {
+                if (!transparent(at(-current_y, -current_x, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }
@@ -371,7 +406,7 @@ bool World::visible(const int x, const int y, const int z,
                     current_x++;
                 }
                 
-                if (at(-current_x,-current_y, from_z) != TILE_VOID) {
+                if (!transparent(at(-current_x,-current_y, from_z))) {
                     if (current_x == x1 && current_y == y1) {
                         return true;
                     }

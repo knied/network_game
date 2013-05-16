@@ -12,12 +12,34 @@
 #include <iostream>
 #include <vector>
 
+#include "defines.h"
+
 class World {
     int _width; // west - east
     int _height; // north - south
     int _depth; // up - down
     
     std::vector<unsigned char> _data;
+
+    bool transparent(unsigned char tile) const {
+        if (tile == TILE_VOID) {
+            return true;
+        }
+        if (tile == TILE_LADDER) {
+            return true;
+        }
+        return false;
+    }
+
+    bool enterable(unsigned char tile) const {
+        if (tile == TILE_VOID) {
+            return true;
+        }
+        if (tile == TILE_LADDER) {
+            return true;
+        }
+        return false;
+    }
     
 public:
     World(int width, int height, int depth);

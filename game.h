@@ -6,8 +6,10 @@
 #include "World.h"
 
 enum ControlID {
-    CONTROL_LEFT,
-    CONTROL_RIGHT,
+    CONTROL_WEST,
+    CONTROL_EAST,
+    CONTROL_NORTH,
+    CONTROL_SOUTH,
     CONTROL_UP,
     CONTROL_DOWN
 };
@@ -51,14 +53,14 @@ public:
     void set_a(bool state) {
         if (state && !_state_a)
         {
-            _acumulator += 1.0f;
+            _acumulator = 1.0f;
         }
         _state_a = state;
     }
     void set_b(bool state) {
         if (state && !_state_b)
         {
-            _acumulator -= 1.0f;
+            _acumulator = -1.0f;
         }
         _state_b = state;
     }
@@ -85,10 +87,13 @@ class Game
 
     std::vector<Tile> _tiles;
 
+    DirControl _control_north_south;
+    DirControl _control_west_east;
     DirControl _control_up_down;
-    DirControl _control_left_right;
 
     float _draw_acumulator;
+
+    void update_position(int &x, int &y, int &z, int diff_x, int diff_y, int diff_z) const;
 
     void handle_input(float dt);
     void update_tiles();

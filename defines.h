@@ -19,6 +19,7 @@
 #define TILE_GRASS1 7
 #define TILE_GRASS2 8
 #define TILE_GRASS3 9
+#define TILE_LADDER 10
 
 #define NAV_LEVEL 0
 #define NAV_UP 1

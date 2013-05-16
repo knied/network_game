@@ -302,13 +302,17 @@ void GameView::timerEvent(QTimerEvent *event)
 void GameView::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Left) {
-        _game.set_control(CONTROL_LEFT, true);
+        _game.set_control(CONTROL_WEST, true);
     } else if (event->key() == Qt::Key_Right) {
-        _game.set_control(CONTROL_RIGHT, true);
+        _game.set_control(CONTROL_EAST, true);
     } else if (event->key() == Qt::Key_Up) {
-        _game.set_control(CONTROL_UP, true);
+        _game.set_control(CONTROL_NORTH, true);
     } else if (event->key() == Qt::Key_Down) {
+        _game.set_control(CONTROL_SOUTH, true);
+    } else if (event->key() == Qt::Key_Period) {
         _game.set_control(CONTROL_DOWN, true);
+    } else if (event->key() == Qt::Key_Comma) {
+        _game.set_control(CONTROL_UP, true);
     } else {
         QGLWidget::keyPressEvent(event);
     }
@@ -316,13 +320,17 @@ void GameView::keyPressEvent(QKeyEvent *event)
 
 void GameView::keyReleaseEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Left) {
-        _game.set_control(CONTROL_LEFT, false);
+        _game.set_control(CONTROL_WEST, false);
     } else if (event->key() == Qt::Key_Right) {
-        _game.set_control(CONTROL_RIGHT, false);
+        _game.set_control(CONTROL_EAST, false);
     } else if (event->key() == Qt::Key_Up) {
-        _game.set_control(CONTROL_UP, false);
+        _game.set_control(CONTROL_NORTH, false);
     } else if (event->key() == Qt::Key_Down) {
+        _game.set_control(CONTROL_SOUTH, false);
+    } else if (event->key() == Qt::Key_Period) {
         _game.set_control(CONTROL_DOWN, false);
+    } else if (event->key() == Qt::Key_Comma) {
+        _game.set_control(CONTROL_UP, false);
     } else {
         QGLWidget::keyPressEvent(event);
     }

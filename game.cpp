@@ -21,19 +21,14 @@ _draw_acumulator(0.0f)
     update_tiles();
 }
 
-void Game::handle_input(float dt) {
-    _control_left_right.update(dt);
-    _control_up_down.update(dt);
-}
+void Game::update_position(int &x, int &y, int &z, int diff_x, int diff_y, int diff_z) const {
+    /*if (_world.at(x, y, z) != TILE_LADDER) {
+        diff_z = 0;
+    }*/
 
-void Game::update_tiles() {
-    // update player position
-    int diff_x = _control_left_right.get();
-    int diff_y = _control_up_down.get();
-
-    int new_position_x = _position_x + diff_x;
-    int new_position_y = _position_y + diff_y;
-    int new_position_z = _position_z;
+    int new_position_x = x + diff_x;
+    int new_position_y = y + diff_y;
+    int new_position_z = z + diff_z;
 
     if (new_position_x < 0) {
         new_position_x = 0;
@@ -48,34 +43,70 @@ void Game::update_tiles() {
     if (new_position_y >= _world.height()) {
         new_position_y = _world.height() - 1;
     }
+
+    if (new_position_z < 0) {
+        new_position_z = 0;
+    }
+    if (new_position_z >= _world.depth()) {
+        new_position_z = _world.depth() - 1;
+    }
     
-    if (_world.at(new_position_x, new_position_y, new_position_z) != TILE_VOID) {
+    // handle movement on the same level
+    if (_world.at(new_position_x, new_position_y, z) != TILE_VOID &&
+        _world.at(new_position_x, new_position_y, z) != TILE_LADDER) {
         // blocked, can we go up?
-        new_position_z++;
-        if (_world.at(new_position_x, new_position_y, new_position_z) != TILE_VOID) {
+        if (_world.at(x, y, z) != TILE_LADDER)
+        {
+            new_position_z = z + 1;
+            if (_world.at(new_position_x, new_position_y, z + 1) != TILE_VOID &&
+                _world.at(new_position_x, new_position_y, z + 1) != TILE_LADDER) {
+                // collision -> do not move
+                new_position_x = x;
+                new_position_y = y;
+            }
+        } else {
             // collision -> do not move
-            new_position_x = _position_x;
-            new_position_y = _position_y;
-            new_position_z = _position_z;
+            new_position_x = x;
+            new_position_y = y;
         }
     }
+
+    // handle movement in vertical direction
+    if (_world.at(new_position_x, new_position_y, new_position_z) != TILE_VOID &&
+        _world.at(new_position_x, new_position_y, new_position_z) != TILE_LADDER) {
+        new_position_z = z;
+    }
     
-    _position_x = new_position_x;
-    _position_y = new_position_y;
-    _position_z = new_position_z;
+    x = new_position_x;
+    y = new_position_y;
+    z = new_position_z;
     
     // are we falling?
-    if (_world.at(_position_x, _position_y, _position_z - 1) == TILE_VOID) {
+    if (_world.at(x, y, z - 1) == TILE_VOID && _world.at(x, y, z) != TILE_LADDER) {
         // we are!
-        _position_z--;
+        z--;
     }
     
-    if (_position_z < 0) {
-        _position_z = 0;
+    if (z < 0) {
+        z = 0;
     }
-    if (_position_z >= _world.depth()) {
-        _position_z = _world.depth() - 1;
+    if (z >= _world.depth()) {
+        z = _world.depth() - 1;
     }
+}
+
+void Game::handle_input(float dt) {
+    _control_north_south.update(dt);
+    _control_west_east.update(dt);
+    _control_up_down.update(dt);
+}
+
+void Game::update_tiles() {
+    // update player position
+    update_position(_position_x, _position_y, _position_z,
+                    _control_west_east.get(), _control_north_south.get(), _control_up_down.get());
+
+    //std::cout << _position_x << " " << _position_y << std::endl;
 
     Display display(_width, _height,
                     _position_x, _position_y, _position_z,
@@ -94,6 +125,7 @@ void Game::update_tiles() {
     const Color grass2_color = {96,192,96,255};
     const Color grass1_color = {64,160,64,255};
     const Color grass0_color = {32,128,32,255};
+    const Color ladder_color = {50,50,50,255};
     
     const Color guy_color = {200,80,80,255};
 
@@ -170,6 +202,12 @@ void Game::update_tiles() {
                     tile.x = 6;
                     tile.y = 0;
                 } break;
+                case TILE_LADDER: {
+                    tile.color0 = ladder_color;
+                    tile.color1 = text_color;
+                    tile.x = 15;
+                    tile.y = 1;
+                } break;
                     
                 default:
                     break;
@@ -215,7 +253,11 @@ void Game::update_tiles() {
                     if (display.navigation_at(x-1, y) == NAV_LEVEL ||
                         display.navigation_at(x+1, y) == NAV_LEVEL ||
                         display.navigation_at(x, y-1) == NAV_LEVEL ||
-                        display.navigation_at(x, y+1) == NAV_LEVEL) {
+                        display.navigation_at(x, y+1) == NAV_LEVEL ||
+                        display.navigation_at(x+1, y+1) == NAV_LEVEL ||
+                        display.navigation_at(x+1, y-1) == NAV_LEVEL ||
+                        display.navigation_at(x-1, y+1) == NAV_LEVEL ||
+                        display.navigation_at(x-1, y-1) == NAV_LEVEL) {
                         tile.x = 14;
                         tile.y = 4;
                     } else {
@@ -260,8 +302,10 @@ const Tile& Game::tile(int x, int y) const {
 
 void Game::set_control(ControlID control, bool state) {
     switch (control) {
-        case CONTROL_LEFT: _control_left_right.set_b(state); break;
-        case CONTROL_RIGHT: _control_left_right.set_a(state); break;
+        case CONTROL_WEST: _control_west_east.set_b(state); break;
+        case CONTROL_EAST: _control_west_east.set_a(state); break;
+        case CONTROL_NORTH: _control_north_south.set_a(state); break;
+        case CONTROL_SOUTH: _control_north_south.set_b(state); break;
         case CONTROL_UP: _control_up_down.set_a(state); break;
         case CONTROL_DOWN: _control_up_down.set_b(state); break;
     }

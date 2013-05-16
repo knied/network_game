@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "World.h"
+#include "defines.h"
 
 class Display {
     int _width;
@@ -20,6 +21,26 @@ class Display {
     std::vector<unsigned char> _tiles;
     std::vector<unsigned char> _navigations;
     void set_tile(int x, int y, unsigned char tile);
+
+    bool transparent(unsigned char tile) {
+        if (tile == TILE_VOID) {
+            return true;
+        }
+        if (tile == TILE_LADDER) {
+            return true;
+        }
+        return false;
+    }
+
+    bool enterable(unsigned char tile) {
+        if (tile == TILE_VOID) {
+            return true;
+        }
+        if (tile == TILE_LADDER) {
+            return true;
+        }
+        return false;
+    }
     
 public:
     Display(int width, int height,
