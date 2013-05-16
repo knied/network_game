@@ -7,7 +7,8 @@ _width(24), _height(24),
 _world_width(128), _world_height(128), _world_depth(128),
 _position_x(_world_width / 2), _position_y(_world_height / 2), _position_z(0),
 _move_x(0), _move_y(0),
-_world(_world_width, _world_height, _world_depth)
+_world(_world_width, _world_height, _world_depth),
+_draw_acumulator(0.0f)
 {
     // find the surface and place the player on top of it
     for (int i = 0; i < _world.depth(); ++i) {
@@ -16,11 +17,22 @@ _world(_world_width, _world_height, _world_depth)
             break;
         }
     }
+
+    update_tiles();
 }
 
-void Game::update() {
-    int new_position_x = _position_x + (_control_right.get() - _control_left.get());
-    int new_position_y = _position_y + (_control_up.get() - _control_down.get());
+void Game::handle_input(float dt) {
+    _control_left_right.update(dt);
+    _control_up_down.update(dt);
+}
+
+void Game::update_tiles() {
+    // update player position
+    int diff_x = _control_left_right.get();
+    int diff_y = _control_up_down.get();
+
+    int new_position_x = _position_x + diff_x;
+    int new_position_y = _position_y + diff_y;
     int new_position_z = _position_z;
 
     if (new_position_x < 0) {
@@ -231,15 +243,26 @@ void Game::update() {
     }
 }
 
+void Game::update(float dt) {
+    handle_input(dt);
+
+    _draw_acumulator += dt;
+    if (_draw_acumulator > 0.1f) {
+        update_tiles();
+        _draw_acumulator = 0.0f;   
+    }
+    
+}
+
 const Tile& Game::tile(int x, int y) const {
     return _tiles[_width * y + x];
 }
 
 void Game::set_control(ControlID control, bool state) {
     switch (control) {
-        case CONTROL_LEFT: _control_left.set(state); break;
-        case CONTROL_RIGHT: _control_right.set(state); break;
-        case CONTROL_UP: _control_up.set(state); break;
-        case CONTROL_DOWN: _control_down.set(state); break;
+        case CONTROL_LEFT: _control_left_right.set_b(state); break;
+        case CONTROL_RIGHT: _control_left_right.set_a(state); break;
+        case CONTROL_UP: _control_up_down.set_a(state); break;
+        case CONTROL_DOWN: _control_up_down.set_b(state); break;
     }
 }

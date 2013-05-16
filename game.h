@@ -23,25 +23,44 @@ struct Tile {
     Color color1;
 };
 
-class Control {
-    bool _state;
-    bool _next_returned_state;
+class DirControl {
+    volatile bool _state_a;
+    volatile bool _state_b;
+
+    float _acumulator;
 
 public:
-    Control() : _state(false), _next_returned_state(false) {}
+    DirControl() : _state_a(false), _state_b(false), _acumulator(0.0f) {}
+
+    void update(float dt) {
+        int dir = (_state_a ? 1 : 0) - (_state_b ? 1 : 0);
+        _acumulator += 10.0f * (float)dir * dt;
+    }
 
     int get() {
-        if (_next_returned_state) {
-            _next_returned_state = _state;
+        if (_acumulator >= 1.0f)
+        {
+            _acumulator = 0.0f;
             return 1;
+        } else if (_acumulator <= -1.0f) {
+            _acumulator = 0.0f;
+            return -1;
         }
         return 0;
     }
-    void set(bool state) {
-        _state = state;
-        if (!_next_returned_state) {
-            _next_returned_state = state;
+    void set_a(bool state) {
+        if (state && !_state_a)
+        {
+            _acumulator += 1.0f;
         }
+        _state_a = state;
+    }
+    void set_b(bool state) {
+        if (state && !_state_b)
+        {
+            _acumulator -= 1.0f;
+        }
+        _state_b = state;
     }
 
 };
@@ -66,17 +85,20 @@ class Game
 
     std::vector<Tile> _tiles;
 
-    Control _control_up;
-    Control _control_down;
-    Control _control_left;
-    Control _control_right;
+    DirControl _control_up_down;
+    DirControl _control_left_right;
+
+    float _draw_acumulator;
+
+    void handle_input(float dt);
+    void update_tiles();
 public:
     Game();
 
     int width() const { return _width; }
     int height() const { return _height; }
 
-    void update();
+    void update(float dt);
     const Tile& tile(int x, int y) const;
 
     void set_control(ControlID control, bool state);

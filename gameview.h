@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include <vector>
+#include <sys/time.h>
 
 #include "game.h"
 
@@ -31,6 +32,7 @@ private:
     int _tile_size;
 
     Game _game;
+    timeval _lastTime;
 
     int _timer_id;
     GLuint _vao;

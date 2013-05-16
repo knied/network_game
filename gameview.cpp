@@ -61,8 +61,6 @@ void GameView::link_program() {
 }
 
 void GameView::update_vertex_buffer() {
-    _game.update();
-
     std::vector<Vertex> vertex_data(_game.width() * _game.height() * 6);
     for(int y = 0; y < _game.height(); ++y) {
         for(int x = 0; x < _game.width(); ++x) {
@@ -239,6 +237,8 @@ void GameView::initializeGL()
     if (error != GL_NO_ERROR) {
         std::cout << "Error: " << error << std::endl;
     }
+
+    gettimeofday(&_lastTime, 0);
 }
 
 void GameView::resizeGL(int width, int height)
@@ -265,6 +265,11 @@ void GameView::resizeGL(int width, int height)
 
 void GameView::paintGL()
 {
+    timeval tmpTime = _lastTime;
+    gettimeofday(&_lastTime, 0);
+    float dt = (float)(_lastTime.tv_sec - tmpTime.tv_sec) + (float)(_lastTime.tv_usec - tmpTime.tv_usec) * 0.000001f;
+
+    _game.update(dt);
     update_vertex_buffer();
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -280,7 +285,7 @@ void GameView::paintGL()
 
 void GameView::showEvent(QShowEvent * /* event */)
 {
-    _timer_id = startTimer(100);
+    _timer_id = startTimer(1);
 }
 
 void GameView::timerEvent(QTimerEvent *event)
