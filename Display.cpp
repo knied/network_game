@@ -39,7 +39,7 @@ Display::Display(int width, int height,
                     set_navigation(x, y, NAV_UNKNOWN);
                 } else {
                     // can we go that way?
-                    if (enterable(world.at(x_index, y_index, position_z))) {
+                    if (world.enterable(x_index, y_index, position_z)) {
                         // we could
                         // is this a ladder?
                         if (world.at(x_index, y_index, position_z) == TILE_LADDER) {
@@ -58,7 +58,7 @@ Display::Display(int width, int height,
                     } else {
                         // this level is blocked
                         // can we go up?
-                        if (enterable(world.at(x_index, y_index, position_z + 1))) {
+                        if (world.enterable(x_index, y_index, position_z + 1)) {
                             // we can go up
                             set_navigation(x, y, NAV_UP);
                         } else {
