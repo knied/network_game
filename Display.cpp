@@ -11,7 +11,7 @@
 Display::Display(int width, int height,
                  int position_x, int position_y, int position_z,
                  const World& world)
-: _width(width), _height(height), _tiles(width*height), _navigations(width*height) {
+: _width(width), _height(height), _data(width*height) {
     for (int y = 0; y < _height; ++y) {
         for (int x = 0; x < _width; ++x) {
             int x_index = position_x + x - _width / 2;
@@ -79,23 +79,23 @@ void Display::set_tile(int x, int y, unsigned char tile) {
     if (x < 0 || x >= _width || y < 0 || y >= _height) {
         return;
     }
-    _tiles[y * _width + x] = tile;
+    _data[y * _width + x] = tile | (_data[y * _width + x] & NAV_MASK);
 }
 void Display::set_navigation(int x, int y, unsigned char navigation) {
     if (x < 0 || x >= _width || y < 0 || y >= _height) {
         return;
     }
-    _navigations[y * _width + x] = navigation;
+    _data[y * _width + x] = navigation | (_data[y * _width + x] & TILE_MASK);
 }
 unsigned char Display::tile_at(int x, int y) const {
     if (x < 0 || x >= _width || y < 0 || y >= _height) {
         return TILE_VOID;
     }
-    return _tiles[y * _width + x];
+    return _data[y * _width + x] & TILE_MASK;
 }
 unsigned char Display::navigation_at(int x, int y) const {
     if (x < 0 || x >= _width || y < 0 || y >= _height) {
         return NAV_FALL;
     }
-    return _navigations[y * _width + x];
+    return _data[y * _width + x] & NAV_MASK;
 }

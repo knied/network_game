@@ -18,8 +18,7 @@
 class Display {
     int _width;
     int _height;
-    std::vector<unsigned char> _tiles;
-    std::vector<unsigned char> _navigations;
+    std::vector<unsigned char> _data;
     void set_tile(int x, int y, unsigned char tile);
     
 public:

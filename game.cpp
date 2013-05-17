@@ -22,10 +22,6 @@ _draw_acumulator(0.0f)
 }
 
 void Game::update_position(int &x, int &y, int &z, int diff_x, int diff_y, int diff_z) const {
-    /*if (_world.at(x, y, z) != TILE_LADDER) {
-        diff_z = 0;
-    }*/
-
     int new_position_x = x + diff_x;
     int new_position_y = y + diff_y;
     int new_position_z = z + diff_z;
@@ -105,9 +101,7 @@ void Game::update_tiles() {
     // update player position
     update_position(_position_x, _position_y, _position_z,
                     _control_west_east.get(), _control_north_south.get(), _control_up_down.get());
-
-    //std::cout << _position_x << " " << _position_y << std::endl;
-
+    // create the players view on the world
     Display display(_width, _height,
                     _position_x, _position_y, _position_z,
                     _world);
