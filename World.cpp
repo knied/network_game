@@ -24,28 +24,28 @@ World::World(int width, int height, int depth)
                     if (z + 1 >= max) {
                         // surface
                         if (z <= _depth / 2 - 1) {
-                            set(x, y, z, TILE_SAND);
+                            set(x, y, z, BLOCK_SAND);
                         } else if (z == _depth / 2) {
-                            set(x, y, z, TILE_GRASS0);
+                            set(x, y, z, BLOCK_GRASS);
                         } else if (z == _depth / 2 + 1) {
-                            set(x, y, z, TILE_GRASS1);
+                            set(x, y, z, BLOCK_GRASS);
                         } else if (z == _depth / 2 + 2) {
-                            set(x, y, z, TILE_GRASS2);
+                            set(x, y, z, BLOCK_GRASS);
                         } else if (z == _depth / 2 + 3) {
-                            set(x, y, z, TILE_GRASS3);
+                            set(x, y, z, BLOCK_GRASS);
                         } else {
-                            set(x, y, z, TILE_STONE);
+                            set(x, y, z, BLOCK_STONE);
                         }
                     } else {
                         // below surface
-                        set(x, y, z, TILE_STONE);
+                        set(x, y, z, BLOCK_STONE);
                     }
                     
                 } else {
                     if (z < _depth / 2) {
-                        set(x, y, z, TILE_WATER);
+                        set(x, y, z, BLOCK_WATER);
                     } else {
-                        set(x, y, z, TILE_VOID);
+                        set(x, y, z, BLOCK_VOID);
                     }
                 }
             }
@@ -60,8 +60,8 @@ World::World(int width, int height, int depth)
         // find the surface at this position
         int i = 0;
         for (; i < _depth; ++i) {
-            if (at(dungeon_x, dungeon_y, i) == TILE_VOID) {
-                if (at(dungeon_x, dungeon_y, i-1) != TILE_WATER) {
+            if (at(dungeon_x, dungeon_y, i) == BLOCK_VOID) {
+                if (at(dungeon_x, dungeon_y, i-1) != BLOCK_WATER) {
                     found = true;
                 }
                 break;
@@ -75,13 +75,13 @@ World::World(int width, int height, int depth)
         // make a room
         for (int y = -5; y < 5; ++y) {
             for (int x = -5; x < 5; ++x) {
-                set(x + dungeon_x, y + dungeon_y, i - 16, TILE_VOID);
+                set(x + dungeon_x, y + dungeon_y, i - 16, BLOCK_VOID);
             }
         }
 
         // create a ladder
         for (int j = 0; j < 16; ++j) {
-            set(dungeon_x, dungeon_y, i - j - 1, TILE_LADDER);
+            set(dungeon_x, dungeon_y, i - j - 1, BLOCK_LADDER);
         }
 
         std::cout << "placed a dungeon at: " << dungeon_x << " " << dungeon_y << std::endl;
@@ -90,7 +90,7 @@ World::World(int width, int height, int depth)
 
 unsigned char World::at(const int x, const int y, const int z) const {
     if (x < 0 || x >= _width || y < 0 || y >= _height || z < 0 || z >= _depth) {
-        return TILE_VOID; // void
+        return BLOCK_VOID; // void
     }
     return _data[z * _height * _width + y * _width + x];
 }
@@ -103,10 +103,10 @@ void World::set(const int x, const int y, const int z, const unsigned char block
 
 bool World::enterable(const int x, const int y, const int z) const {
     unsigned char tile = at(x, y, z);
-    if (tile == TILE_VOID) {
+    if (tile == BLOCK_VOID) {
         return true;
     }
-    if (tile == TILE_LADDER) {
+    if (tile == BLOCK_LADDER) {
         return true;
     }
     return false;
@@ -114,10 +114,10 @@ bool World::enterable(const int x, const int y, const int z) const {
 
 bool World::transparent(const int x, const int y, const int z) const {
     unsigned char tile = at(x, y, z);
-    if (tile == TILE_VOID) {
+    if (tile == BLOCK_VOID) {
         return true;
     }
-    if (tile == TILE_LADDER) {
+    if (tile == BLOCK_LADDER) {
         return true;
     }
     return false;
@@ -279,3 +279,73 @@ bool World::visible(const int x, const int y, const int z,
 int World::width() const {return _width;}
 int World::height() const {return _height;}
 int World::depth() const {return _depth;}
+
+void World::move_entity(int &x, int &y, int &z, int diff_x, int diff_y, int diff_z) const {
+    int new_position_x = x + diff_x;
+    int new_position_y = y + diff_y;
+    int new_position_z = z + diff_z;
+
+    if (new_position_x < 0) {
+        new_position_x = 0;
+    }
+    if (new_position_x >= width()) {
+        new_position_x = width() - 1;
+    }
+
+    if (new_position_y < 0) {
+        new_position_y = 0;
+    }
+    if (new_position_y >= height()) {
+        new_position_y = height() - 1;
+    }
+
+    if (new_position_z < 0) {
+        new_position_z = 0;
+    }
+    if (new_position_z >= depth()) {
+        new_position_z = depth() - 1;
+    }
+    
+    // handle movement on the same level
+    if (at(new_position_x, new_position_y, z) != BLOCK_VOID &&
+        at(new_position_x, new_position_y, z) != BLOCK_LADDER) {
+        // blocked, can we go up?
+        if (at(x, y, z) != BLOCK_LADDER)
+        {
+            new_position_z = z + 1;
+            if (at(new_position_x, new_position_y, z + 1) != BLOCK_VOID &&
+                at(new_position_x, new_position_y, z + 1) != BLOCK_LADDER) {
+                // collision -> do not move
+                new_position_x = x;
+                new_position_y = y;
+            }
+        } else {
+            // collision -> do not move
+            new_position_x = x;
+            new_position_y = y;
+        }
+    }
+
+    // handle movement in vertical direction
+    if (at(new_position_x, new_position_y, new_position_z) != BLOCK_VOID &&
+        at(new_position_x, new_position_y, new_position_z) != BLOCK_LADDER) {
+        new_position_z = z;
+    }
+    
+    x = new_position_x;
+    y = new_position_y;
+    z = new_position_z;
+    
+    // are we falling?
+    if (at(x, y, z - 1) == BLOCK_VOID && at(x, y, z) != BLOCK_LADDER) {
+        // we are!
+        z--;
+    }
+    
+    if (z < 0) {
+        z = 0;
+    }
+    if (z >= depth()) {
+        z = depth() - 1;
+    }
+}

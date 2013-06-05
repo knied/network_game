@@ -66,30 +66,30 @@ void GameView::update_vertex_buffer() {
         for(int x = 0; x < _game.width(); ++x) {
             float tmp = 1.0f / 16.0f;
 
-            int tile_x = _game.tile(x, y).x;
-            int tile_y = _game.tile(x, y).y;
+            int tile_x = _game.player_view().symbol(x, y) % 16;
+            int tile_y = _game.player_view().symbol(x, y) / 16;
 
             float u0 = 0.0f;
             float u1 = 0.0f;
             float v0 = 0.0f;
             float v1 = 0.0f;
-            if (_game.tile(x, y).flip_h != 0) {
+            if (_game.player_view().flip_x(x, y)) {
                 u1 = tile_x * tmp;
                 u0 = (tile_x + 1) * tmp;
             } else {
                 u0 = tile_x * tmp;
                 u1 = (tile_x + 1) * tmp;
             }
-            if (_game.tile(x, y).flip_v != 0) {
+            if (_game.player_view().flip_y(x, y)) {
                 v1 = 1.0f - (tile_y) * tmp;
                 v0 = 1.0f - (tile_y + 1) * tmp;
             } else {
                 v0 = 1.0f - (tile_y) * tmp;
                 v1 = 1.0f - (tile_y + 1) * tmp;
             }
-
-            Color color0 = _game.tile(x, y).color1;
-            Color color1 = _game.tile(x, y).color0;
+            
+            Color color0 = _game.color(_game.player_view().symbol_color(x, y));
+            Color color1 = _game.color(_game.player_view().background_color(x, y));
 
             float x_offset = -(float)_game.width() / 2.0f * (float)_tile_size;
             float y_offset = -(float)_game.height() / 2.0f * (float)_tile_size;

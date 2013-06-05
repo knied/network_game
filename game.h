@@ -16,6 +16,15 @@ enum ControlID {
 
 struct Color {
     unsigned char r, g, b, a;
+
+    Color() : r(0), g(0), b(0), a(0) {}
+    Color(unsigned char red,
+          unsigned char green,
+          unsigned char blue,
+          unsigned char alpha)
+    : r(red), g(green), b(blue), a(alpha) {
+
+    }
 };
 
 struct Tile {
@@ -69,8 +78,9 @@ public:
 
 class Game
 {
-    const int _width;
-    const int _height;
+    enum {ViewWidth = 24};
+    enum {ViewHeight = 24};
+    typedef PlayerView<ViewWidth, ViewHeight> PlayerViewType;
 
     const int _world_width;
     const int _world_height;
@@ -80,12 +90,9 @@ class Game
     int _position_y;
     int _position_z;
 
-    int _move_x;
-    int _move_y;
-
     World _world;
-
-    std::vector<Tile> _tiles;
+    PlayerViewType _view;
+    Color _colors[256];
 
     DirControl _control_north_south;
     DirControl _control_west_east;
@@ -93,18 +100,17 @@ class Game
 
     float _draw_acumulator;
 
-    void update_position(int &x, int &y, int &z, int diff_x, int diff_y, int diff_z) const;
-
     void handle_input(float dt);
     void update_tiles();
 public:
     Game();
 
-    int width() const { return _width; }
-    int height() const { return _height; }
+    int width() const;
+    int height() const;
 
     void update(float dt);
-    const Tile& tile(int x, int y) const;
+    const PlayerViewType& player_view() const;
+    const Color& color(unsigned char color_code) const;
 
     void set_control(ControlID control, bool state);
 };

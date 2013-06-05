@@ -19,14 +19,12 @@ SOURCES += main.cpp\
     gameview.cpp \
     game.cpp \
     World.cpp \
-    Display.cpp \
     Noise2D.cpp
 
 HEADERS  += mainwindow.h \
     gameview.h \
     game.h \
     World.h \
-    Display.h \
     Noise2D.h \
     defines.h
 
