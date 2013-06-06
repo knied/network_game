@@ -43,4 +43,8 @@
 #define TILE_WAVE			0x2E
 #define TILE_HATCHING		0x4E
 
+// Networking
+#define PORT                42000
+#define BUFFER_SIZE         512
+
 #endif
