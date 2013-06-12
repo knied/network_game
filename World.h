@@ -79,16 +79,16 @@ public:
         // bit 4: symbol color changed          0x10
         // bits 5-7: #repeats (specifies how often this pixel gets repeated without changing any of its elements)
 
-    // SYMBOL
+    // SYMBOL (optional: defined by 'symbol changed')
         // bits 0-7: Symbol identifier [0-255]
 
-    // BACKGROUND COLOR
+    // BACKGROUND COLOR (optional: defined by 'background color changed')
         // bits 0-7: Color identifier [0-255]
 
-    // SYMBOL COLOR
+    // SYMBOL COLOR (optional: defined by 'symbol color changed')
         // bits 0-7: Color identifier [0-255]
 private:
-    // Get information about witch elements changed, relative to the last pixel
+    // Get information about witch elements changed, compared to the pixel next to it
     bool pixel_changed(unsigned int pixel_index,
                        bool& flags_changed,
                        bool& symbol_changed,
@@ -132,8 +132,8 @@ public:
         PlayerViewPixel current_pixel = {0, false, false, 0, 0};
         unsigned int data_index = 0;
         unsigned char repeats = 0;
+        // Fill all pixels based on the data stream
         for (int i = 0; i < NUMBER_OF_PIXELS; ++i) {
-            //std::cout << repeats << std::endl;
             if (repeats == 0) {
                 // Get a new flags field from the stream
                 if (size <= data_index) {
@@ -142,6 +142,8 @@ public:
                     return;
                 }
                 unsigned char flags_field = data[data_index++];
+
+                // Parse the flags field
                 current_pixel.flip_x = (flags_field & 0x01) != 0x00;
                 current_pixel.flip_y = (flags_field & 0x02) != 0x00;
                 bool symbol_changed = (flags_field & 0x04) != 0x00;
@@ -177,6 +179,7 @@ public:
                     current_pixel.symbol_color = data[data_index++];
                 }
             } else {
+                // Repeat the pixel from before
                 repeats--;
             }
             _pixels[i] = current_pixel;
@@ -187,18 +190,25 @@ public:
         }
     }
     void serialize(unsigned char data[MAX_SERIALIZED_SIZE], unsigned int& size) const {
-        bool flags_changed = false;
-        bool symbol_changed = false;
-        bool background_color_changed = false;
-        bool symbol_color_changed = false;
+        // offset for the next data element to write
         unsigned int data_index = 0;
+        
         // We have to keep a pointer to the last flag field, in order to change the repeat count
         unsigned char* last_flags_field = 0;
+        
         for (unsigned int i = 0; i < NUMBER_OF_PIXELS; ++i) {
+            bool flags_changed = false;
+            bool symbol_changed = false;
+            bool background_color_changed = false;
+            bool symbol_color_changed = false;
+
+            // Get the current number of repeats of the last pixel
             unsigned char repeats = 0;
             if (last_flags_field) {
                 repeats = ((*last_flags_field) & 0xE0) >> 5;
             }
+
+            // Do we have to insert a new flags element?
             if (pixel_changed(i, flags_changed,
                               symbol_changed,
                               background_color_changed,
@@ -210,29 +220,41 @@ public:
                 last_flags_field = data + (data_index - 1);
 
                 if (symbol_changed) {
+                    // Write the new symbol
                     data[data_index++] = _pixels[i].tile;
+
+                    // Set the Flag in the flags field
                     *last_flags_field |= 0x04;
                 }
 
                 if (background_color_changed) {
+                    // Write the new background color
                     data[data_index++] = _pixels[i].background_color;
+
+                    // Set the Flag in the flags field
                     *last_flags_field |= 0x08;
                 }
 
                 if (symbol_color_changed) {
+                    // Write the new symbol color
                     data[data_index++] = _pixels[i].symbol_color;
+
+                    // Set the Flag in the flags field
                     *last_flags_field |= 0x10;
                 }
             } else {
                 // We can repeat this pixel
-
                 repeats++;
+
                 // Clear the current repeat count
                 *last_flags_field ^= ((*last_flags_field) & 0xE0);
+
                 // Store the new repeat count
                 *last_flags_field |= (repeats << 5);
             }
         }
+
+        // Return the size of this packet
         size = data_index;
     }
 };
