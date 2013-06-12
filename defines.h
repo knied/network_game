@@ -44,7 +44,10 @@
 #define TILE_HATCHING		0x4E
 
 // Networking
-#define PORT                42000
+#define PORT                42001
 #define BUFFER_SIZE         512
+
+// Debugging
+#define DEBUG
 
 #endif

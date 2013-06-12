@@ -34,9 +34,14 @@
 #include <stdio.h>
 #include <string>
 #include <sstream>
-#include <list>
-#include <iostream> // DELETE
-#include "defines.h" // DELETE
+#include <vector>
+
+#include "defines.h"
+
+#ifdef DEBUG
+    #include <iostream>
+    #include <arpa/inet.h>
+#endif
 
 /*
 ** Addresses
@@ -44,20 +49,19 @@
 
 class Address {
 private:
-    sockaddr _address;
+    sockaddr_storage _address;
     const unsigned short _port;
 
 public:
     Address();
-    Address(std::string address, unsigned short port);
-    Address(sockaddr &address, unsigned short port);
-    sa_family_t Family() const { return _address.sa_family; }
-    const sockaddr* Sockaddr() const { return &_address; }
+    Address(const std::string address, const unsigned short port);
+    Address(const sockaddr_storage& address, const unsigned short port);
+    sa_family_t Family() const { return _address.ss_family; }
+    const sockaddr* Sockaddr() const { return (sockaddr*) &_address; }
     socklen_t Size() const {
-        if (_address.sa_family == AF_INET ) return sizeof(sockaddr_in);
-        else return sizeof(sockaddr_in6);
+        return _address.ss_len;
     }
-    void setSockaddr(sockaddr address) { _address = address; }
+    void setSockaddr(const sockaddr_storage& address) { _address = address; }
 };
 
 /*
@@ -68,10 +72,10 @@ class Socket {
 private:
     struct _Sock {
         int descriptor;
-        sockaddr address;
+        sockaddr_storage address;
     };
 
-    std::list<_Sock> _socketDescs;
+    std::vector<_Sock> _socketDescs; // TODO replace with vector
 
 public:
     Socket();
@@ -83,6 +87,6 @@ public:
 };
 
 /* DELETE */
-void testNetwork();
+// void testNetwork();
 
 #endif // NETWORK_H

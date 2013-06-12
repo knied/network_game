@@ -6,7 +6,7 @@ Address::Address()
     memset(&_address, 0, sizeof(_address));
 }
 
-Address::Address(std::string address, unsigned short port)
+Address::Address(const std::string address, const unsigned short port)
     : _port(port)
 {
     // Cast port number into C string
@@ -23,10 +23,10 @@ Address::Address(std::string address, unsigned short port)
 
     // Pick the first valid sockaddr
     memset(&_address, 0, sizeof(_address));
-    _address = *(res->ai_addr);
+    _address = *((sockaddr_storage*) res->ai_addr);
 }
 
-Address::Address(sockaddr& address, unsigned short port)
+Address::Address(const sockaddr_storage& address, const unsigned short port)
     : _address(address),
       _port(port) {
 }
@@ -71,26 +71,26 @@ bool Socket::Open(const unsigned short port) {
         return false;
     }
 
-    // DELETE: print all possible sockets
-    /*
-    std::cout << "Possible sockets:" << std::endl << std::endl;
-    char IPstring[128];
+    // Print all possible sockets
+#ifdef DEBUG
+    std::cout << "-------Opening sockets:-------";
+    char IPString[128], SrvString[128];
     for (addrinfo* p = srvInfo; p != NULL; p = p->ai_next) {
-        inet_ntop(p->ai_family, p->ai_addr, IPstring, 128);
+        getnameinfo(p->ai_addr, p->ai_addrlen, IPString, 128, SrvString, 128, 0);
+        std::cout << std::endl;
         if (p->ai_family == AF_INET) {
             std::cout << "IPv4" << std::endl;
-            std::cout << "Address: " << IPstring << std::endl;
+            std::cout << "Address: " << IPString << std::endl;
             std::cout << "Port: " << ntohs(((sockaddr_in*) p->ai_addr)->sin_port) << std::endl;
         } else if (p->ai_family == AF_INET6) {
             std::cout << "IPv6" << std::endl;
-            std::cout << "Address: " << IPstring << std::endl;
+            std::cout << "Address: " << IPString << std::endl;
             std::cout << "Port: " << ntohs(((sockaddr_in6*) p->ai_addr)->sin6_port) << std::endl;
         } else {
             std::cout << "Unknown address family" << std::endl;
         }
-        std::cout << std::endl;
     }
-    */
+#endif
 
     _Sock newSock;
     for (addrinfo* p = srvInfo; p != NULL; p = p->ai_next) {
@@ -130,7 +130,7 @@ bool Socket::Open(const unsigned short port) {
 #endif
 
         // Add the new socket to the list
-        newSock.address = *p->ai_addr;
+        newSock.address = *((sockaddr_storage*) p->ai_addr);
         _socketDescs.push_back(newSock);
     }
 
@@ -147,7 +147,7 @@ void Socket::Close() {
     WSACleanup();
 #endif
 
-    for (std::list<_Sock>::iterator itSocket = _socketDescs.begin(); itSocket != _socketDescs.end(); itSocket++) {
+    for (std::vector<_Sock>::iterator itSocket = _socketDescs.begin(); itSocket != _socketDescs.end(); itSocket++) {
 #if PLATFORM == PLATFORM_WINDOWS
         closesocket(itSocket->descriptor);
 #else
@@ -166,15 +166,29 @@ void Socket::Close() {
 
 bool Socket::Send(const Address& destination, const void *data, int size) {
     // Find socket with matching IP version
-    std::list<_Sock>::iterator itSocket;
+    std::vector<_Sock>::iterator itSocket;
     for (itSocket = _socketDescs.begin(); itSocket != _socketDescs.end(); itSocket++) {
         // Does the IP version match?
-        if (itSocket->address.sa_family == destination.Family()) {
+        if (itSocket->address.ss_family == destination.Family()) {
+#ifdef DEBUG
+            char IPString[128], SrvString[128];
+            getnameinfo(destination.Sockaddr(), destination.Size(), IPString, 128, SrvString, 128, 0);
+
+            std::cout << "-----------Sending:-----------" << std::endl;
+            std::cout << "Using socket " << itSocket->descriptor
+                      << " (IPv" << (itSocket->address.ss_family == AF_INET ? "4" : "6") << ")" << std::endl
+                      << "Destination: " << IPString << " (IPv" << (itSocket->address.ss_family == AF_INET ? "4" : "6")
+                      << ")" << std::endl;
+#endif
+
             // Send the data
             int sentBytes = 0;
             while (sentBytes != size) {
                 int retVal = sendto(itSocket->descriptor, data, size, 0, destination.Sockaddr(), destination.Size());
                 if (retVal <= 0) {
+#ifdef DEBUG
+                    std::cout << "Socket::Send() failed." << std::endl;
+#endif
                     perror("sendto()");
                     return false;
                 } else {
@@ -187,7 +201,9 @@ bool Socket::Send(const Address& destination, const void *data, int size) {
     }
 
     // We did not find a valid socket
-    printf("Socket::Send(): no matching socket found\n");
+#ifdef DEBUG
+    std::cout << "Socket::Send(): no matching socket found" << std::endl;
+#endif
     return false;
 }
 
@@ -198,29 +214,48 @@ bool Socket::Send(const Address& destination, const void *data, int size) {
 int Socket::Receive(Address& sender, void *data, int size) {
     // Any sockets open?
     if (_socketDescs.empty()) {
-        printf("Socket::Receive(): no open sockets\n");
+#ifdef DEBUG
+        std::cout << "Socket::Receive(): no open sockets" << std::endl;
+#endif
         return -1;
     }
 
-    sockaddr senderSockaddr;
-    socklen_t senderSocklen;
-    for (std::list<_Sock>::iterator itSocket = _socketDescs.begin();
+    sockaddr_storage senderSockaddr;
+    memset(&senderSockaddr, 0, sizeof(senderSockaddr));
+    socklen_t senderSocklen = sizeof(senderSockaddr);
+    for (std::vector<_Sock>::iterator itSocket = _socketDescs.begin();
          itSocket != _socketDescs.end();
          itSocket++) {
-        int retVal = recvfrom(itSocket->descriptor, data, size, 0, &senderSockaddr, &senderSocklen);
+        // Try to receive from first socket
+        int retVal = recvfrom(itSocket->descriptor, data, size, 0, (sockaddr*) &senderSockaddr, &senderSocklen);
         if (retVal <= 0) {
-            perror("recvfrom()");
-            return -1;
+            // No data; continue with next socket
+            continue;
         } else {
+            // Data received
+#ifdef DEBUG
+            char IPString[128], SrvString[128];
+            getnameinfo((sockaddr*) &senderSockaddr, senderSocklen, IPString, 128, SrvString, 128, 0);
+            std::cout << "----------Receiving:----------" << std::endl;
+            std::cout << "From socket " << itSocket->descriptor
+                      << " (IPv" << (itSocket->address.ss_family == AF_INET ? "4" : "6") << ")" << std::endl
+                      << "Source: " << IPString << " (IPv" << (senderSockaddr.ss_family == AF_INET ? "4" : "6") << ")" << std::endl;
+#endif
+
             sender.setSockaddr(senderSockaddr);
             return retVal;
         }
     }
 
+    // No sockets have data to be read
+#ifdef DEBUG
+    std::cout << "Socket::Receive(): no sockets have data to be read" << std::endl;
+#endif
     return -1;
 }
 
 /* DELETE */
+/*
 void testNetwork() {
     std::string msg = "Hello World!";
     char receiveBuf[BUFFER_SIZE];
@@ -228,22 +263,11 @@ void testNetwork() {
     Address addressSelf6("::1", PORT);
     Socket socketSelf;
     socketSelf.Open(PORT);
-    std::cout << "Trying to send using IPv4" << std::endl;
     socketSelf.Send(addressSelf4, msg.c_str(), msg.size());
-    std::cout << "Send() returned" << std::endl;
-    std::cout << "Trying to send using IPv6" << std::endl;
-    socketSelf.Send(addressSelf6, msg.c_str(), msg.size());
-    std::cout << "Send() returned" << std::endl;
     sleep(1);
-    int retVal;
-    do {
-        std::cout << "Trying to receive" << std::endl;
-        retVal = socketSelf.Receive(sender, receiveBuf, BUFFER_SIZE);
-        if (retVal > 0) {
-            std::cout << "Received " << retVal << " Byte via ";
-            if (sender.Family() == AF_INET) std::cout << "IPv4.";
-            else std::cout << "IPv6";
-            std::cout << std::endl;
-        }
-    } while (retVal > 0);
+    socketSelf.Receive(sender, receiveBuf, BUFFER_SIZE);
+    socketSelf.Send(addressSelf6, msg.c_str(), msg.size());
+    sleep(1);
+    socketSelf.Receive(sender, receiveBuf, BUFFER_SIZE);
 }
+*/
