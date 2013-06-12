@@ -55,6 +55,19 @@ void Game::update_tiles() {
     // show the player character
     _view.set_symbol(ViewWidth / 2, ViewHeight / 2, 0, false, false);
     _view.set_symbol_color(ViewWidth / 2, ViewHeight / 2, COLOR_PLAYER0);
+
+    // Serialize the View just for fun
+    unsigned char serialized_view[PlayerViewType::MAX_SERIALIZED_SIZE];
+    unsigned int serialized_size = 0;
+    _view.serialize(serialized_view, serialized_size);
+    /*std::cout << std::hex << (unsigned int)serialized_view[0] << std::endl;
+    std::cout << std::hex << (unsigned int)serialized_view[1] << std::endl;
+    std::cout << std::hex << (unsigned int)serialized_view[2] << std::endl;
+    std::cout << std::hex << (unsigned int)serialized_view[3] << std::endl;*/
+    std::cout << "Serilized size: " << serialized_size << "/" << PlayerViewType::MAX_SERIALIZED_SIZE << std::endl;
+    std::cout << "Saved " << (1.0f - (float)serialized_size / (float)PlayerViewType::MAX_SERIALIZED_SIZE) * 100.0f << "\%" << std::endl;
+    _view = PlayerViewType();
+    _view.deserialize(serialized_view, serialized_size);
 }
 
 void Game::update(float dt) {
