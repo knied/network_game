@@ -172,6 +172,8 @@ void GameView::initializeGL()
 
     update_vertex_buffer();
 
+#if defined(__APPLE__)
+    // Use GLSL 1.5
     std::string vertex_shader;
     vertex_shader += "#version 150\n";
 
@@ -210,6 +212,47 @@ void GameView::initializeGL()
     fragment_shader += "  frag_color = v_color0 * r + v_color1 * (1.0 - r);\n";
     //fragment_shader += "  frag_color = r * vec4(1.0,0.0,0.0,1.0) + (1.0 - r) * vec4(0.0,0.0,1.0,1.0);\n";
     fragment_shader += "}\n";
+#elif
+    // Use GLSL 1.2
+    std::string vertex_shader;
+    vertex_shader += "#version 120\n";
+
+    vertex_shader += "attribute vec4 vertex;\n";
+    vertex_shader += "attribute vec2 texcoord;\n";
+    vertex_shader += "attribute vec4 color0;\n";
+    vertex_shader += "attribute vec4 color1;\n";
+
+    vertex_shader += "uniform mat4 mvp;\n";
+
+    vertex_shader += "varying vec2 v_texcoord;\n";
+    vertex_shader += "varying vec4 v_color0;\n";
+    vertex_shader += "varying vec4 v_color1;\n";
+
+    vertex_shader += "void main() {\n";
+    vertex_shader += "  gl_Position = mvp * vertex;\n";
+    vertex_shader += "  v_texcoord = texcoord;\n";
+    vertex_shader += "  v_color0 = color0;\n";
+    vertex_shader += "  v_color1 = color1;\n";
+    vertex_shader += "}\n";
+
+    std::string fragment_shader;
+    fragment_shader += "#version 120\n";
+
+    fragment_shader += "varying vec2 v_texcoord;\n";
+    fragment_shader += "varying vec4 v_color0;\n";
+    fragment_shader += "varying vec4 v_color1;\n";
+
+    fragment_shader += "uniform sampler2D texture0;\n";
+
+    //fragment_shader += "out vec4 frag_color;\n";
+
+    fragment_shader += "void main() {\n";
+    fragment_shader += "  float r = texture(texture0, v_texcoord).r;\n";
+    //fragment_shader += "  float r = v_texcoord.x;\n";
+    fragment_shader += "  gl_FragColor = v_color0 * r + v_color1 * (1.0 - r);\n";
+    //fragment_shader += "  frag_color = r * vec4(1.0,0.0,0.0,1.0) + (1.0 - r) * vec4(0.0,0.0,1.0,1.0);\n";
+    fragment_shader += "}\n";
+#endif
 
     GLuint vertex_shader_identifier = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment_shader_identifier = glCreateShader(GL_FRAGMENT_SHADER);

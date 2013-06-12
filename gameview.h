@@ -1,6 +1,9 @@
 #ifndef GAMEVIEW_H
 #define GAMEVIEW_H
 
+// Make Qt load the OpenGL 3 functions
+#define GL3_PROTOTYPES
+
 #include <QGLWidget>
 #include <vector>
 #include <sys/time.h>
