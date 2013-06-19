@@ -4,15 +4,8 @@
 #include <vector>
 #include <iostream>
 #include "World.h"
-
-enum ControlID {
-    CONTROL_WEST,
-    CONTROL_EAST,
-    CONTROL_NORTH,
-    CONTROL_SOUTH,
-    CONTROL_UP,
-    CONTROL_DOWN
-};
+#include "PlayerView.h"
+#include "PlayerInput.h"
 
 struct Color {
     unsigned char r, g, b, a;
@@ -25,13 +18,6 @@ struct Color {
     : r(red), g(green), b(blue), a(alpha) {
 
     }
-};
-
-struct Tile {
-    int x, y;
-    int flip_h, flip_v;
-    Color color0;
-    Color color1;
 };
 
 class DirControl {
@@ -81,6 +67,7 @@ class Game
     enum {ViewWidth = 24};
     enum {ViewHeight = 24};
     typedef PlayerView<ViewWidth, ViewHeight> PlayerViewType;
+    typedef PlayerInput PlayerInputType;
 
     const int _world_width;
     const int _world_height;
@@ -92,6 +79,8 @@ class Game
 
     World _world;
     PlayerViewType _view;
+    PlayerInputType _input;
+
     Color _colors[256];
 
     DirControl _control_north_south;
@@ -108,11 +97,14 @@ public:
     int width() const;
     int height() const;
 
+    
+
     void update(float dt);
     const PlayerViewType& player_view() const;
     const Color& color(unsigned char color_code) const;
 
-    void set_control(ControlID control, bool state);
+    void key_down(unsigned char key);
+    void key_up(unsigned char key);
 };
 
 #endif // GAME_H

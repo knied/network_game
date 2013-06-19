@@ -19,7 +19,11 @@ SOURCES += main.cpp\
            game.cpp \
            World.cpp \
            Noise2D.cpp \
-           Network.cpp
+           Network.cpp \
+           PlayerView.cpp \
+           PlayerInput.cpp \
+           GameClient.cpp \
+           GameServer.cpp
 
 HEADERS += mainwindow.h \
            gameview.h \
@@ -27,6 +31,10 @@ HEADERS += mainwindow.h \
            World.h \
            Noise2D.h \
            defines.h \
-           Network.h
+           Network.h \
+           PlayerView.h \
+           PlayerInput.h \
+           GameClient.h \
+           GameServer.h
 
 RESOURCES = resources.qrc
