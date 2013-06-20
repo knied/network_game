@@ -1,4 +1,5 @@
 #include "GameClient.h"
+#include "defines.h"
 
 GameClient::GameClient() {
 	// initialize colors
@@ -23,7 +24,7 @@ void GameClient::update(float dt) {
 	// TODO: network stuff
 }
 
-const PlayerViewType& GameClient::player_view() const {
+const GameClient::PlayerViewType& GameClient::player_view() const {
 	return _view;
 }
 

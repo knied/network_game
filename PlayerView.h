@@ -10,7 +10,7 @@ public:
     enum {SYMBOL_FIELD_SIZE = 1};
     enum {COLORS_FIELD_SIZE = 2};
     enum {NUMBER_OF_PIXELS = ViewWidth * ViewHeight};
-    enum {MAX_SERIALIZED_SIZE = NUMBER_OF_PIXELS * (FLAGS_FIELD_SIZE + SYMBOL_FIELD_SIZE + COLORS_FIELD_SIZE)};
+    enum {MAX_SERIALIZE_SIZE = NUMBER_OF_PIXELS * (FLAGS_FIELD_SIZE + SYMBOL_FIELD_SIZE + COLORS_FIELD_SIZE)};
 
 private:
     struct PlayerViewPixel {
@@ -116,7 +116,7 @@ private:
     }
 
 public:
-    void deserialize(const unsigned char data[MAX_SERIALIZED_SIZE], const unsigned int size) {
+    void deserialize(const unsigned char data[MAX_SERIALIZE_SIZE], const unsigned int size) {
         PlayerViewPixel current_pixel = {0, false, false, 0, 0};
         unsigned int data_index = 0;
         unsigned char repeats = 0;
@@ -177,7 +177,7 @@ public:
             std::cerr << "  Packet larger than expected." << std::endl;
         }
     }
-    void serialize(unsigned char data[MAX_SERIALIZED_SIZE], unsigned int& size) const {
+    void serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int& size) const {
         // offset for the next data element to write
         unsigned int data_index = 0;
         

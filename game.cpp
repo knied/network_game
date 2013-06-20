@@ -236,7 +236,7 @@ void view_from_position(PlayerView<ViewWidth, ViewHeight>& result,
 
 void Game::update_tiles() {
     // Serialize the input just for fun.
-    unsigned char serialized_input[PlayerInputType::MAX_SERIALIZED_SIZE];
+    unsigned char serialized_input[PlayerInputType::MAX_SERIALIZE_SIZE];
     unsigned int serialized_input_size = 0;
     _input.serialize(serialized_input, serialized_input_size);
     std::cout << "Serialized input size: " << serialized_input_size << std::endl;
@@ -280,11 +280,11 @@ void Game::update_tiles() {
     _view.set_symbol_color(ViewWidth / 2, ViewHeight / 2, COLOR_PLAYER0);
 
     // Serialize the View just for fun. Later, this will be done by the serber
-    unsigned char serialized_view[PlayerViewType::MAX_SERIALIZED_SIZE];
+    unsigned char serialized_view[PlayerViewType::MAX_SERIALIZE_SIZE];
     unsigned int serialized_view_size = 0;
     _view.serialize(serialized_view, serialized_view_size);
-    std::cout << "Serilized view size: " << serialized_view_size << "/" << PlayerViewType::MAX_SERIALIZED_SIZE << std::endl;
-    std::cout << "Saved " << (1.0f - (float)serialized_view_size / (float)PlayerViewType::MAX_SERIALIZED_SIZE) * 100.0f << "\%" << std::endl;
+    std::cout << "Serilized view size: " << serialized_view_size << "/" << PlayerViewType::MAX_SERIALIZE_SIZE << std::endl;
+    std::cout << "Saved " << (1.0f - (float)serialized_view_size / (float)PlayerViewType::MAX_SERIALIZE_SIZE) * 100.0f << "\%" << std::endl;
 
     // Clear the view, to be sure, that the derserialization works
     _view = PlayerViewType();
