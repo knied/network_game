@@ -19,7 +19,8 @@ SOURCES += main.cpp\
            game.cpp \
            World.cpp \
            Noise2D.cpp \
-           Network.cpp
+           Network.cpp \
+           VirtualConnection.cpp \
 
 HEADERS += mainwindow.h \
            gameview.h \
@@ -27,6 +28,7 @@ HEADERS += mainwindow.h \
            World.h \
            Noise2D.h \
            defines.h \
-           Network.h
+           Network.h \
+           VirtualConnection.h \
 
 RESOURCES = resources.qrc

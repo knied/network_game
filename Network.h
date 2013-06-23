@@ -57,6 +57,7 @@ public:
     Address(const std::string address, const unsigned short port);
     Address(const sockaddr_storage& address, const unsigned short port);
     sa_family_t Family() const { return _address.ss_family; }
+    unsigned short Port() const { return _port; }
     const sockaddr* Sockaddr() const { return (sockaddr*) &_address; }
     socklen_t Size() const {
         return _address.ss_len;
@@ -82,8 +83,8 @@ public:
     ~Socket();
     bool Open(const unsigned short port);
     void Close();
-    bool Send(const Address& destination, const void* data, int size);
-    int  Receive(Address& sender, void* data, int size);
+    bool Send(const Address& destination, const void* data, const int size);
+    unsigned int  Receive(Address& sender, void* data, int size);
 };
 
 /* DELETE */

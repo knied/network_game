@@ -44,8 +44,16 @@
 #define TILE_HATCHING		0x4E
 
 // Networking
-#define PORT                42001
+#define PORT                42000
 #define BUFFER_SIZE         512
+
+// Virtual Connection
+#define PROTOCOL_ID      0x42424242
+// 4Byte PROTOCOL_ID, 2Byte SEQ, 2Byte ACK, 4Byte ACK bitfield
+#define HEADER_SIZE      (4 + 2 + 2 + 4)
+#define MAX_PACKET_SIZE  (HEADER_SIZE + BUFFER_SIZE)
+// Maxmium distance between two sequence numbers
+#define MAX_SEQ_DISTANCE 0xFFFE // = 2^16-1 = 65.534
 
 // Debugging
 #define DEBUG

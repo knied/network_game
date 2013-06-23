@@ -164,7 +164,7 @@ void Socket::Close() {
 ** For IPv4/6 addresses the IPv4/6 socket is used respectively
 */
 
-bool Socket::Send(const Address& destination, const void *data, int size) {
+bool Socket::Send(const Address& destination, const void *data, const int size) {
     // Find socket with matching IP version
     std::vector<_Sock>::iterator itSocket;
     for (itSocket = _socketDescs.begin(); itSocket != _socketDescs.end(); itSocket++) {
@@ -211,7 +211,7 @@ bool Socket::Send(const Address& destination, const void *data, int size) {
 ** Receive <size> Bytes from the first socket with data in queue
 */
 
-int Socket::Receive(Address& sender, void *data, int size) {
+unsigned int Socket::Receive(Address& sender, void *data, int size) {
     // Any sockets open?
     if (_socketDescs.empty()) {
 #ifdef DEBUG
