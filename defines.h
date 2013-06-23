@@ -43,6 +43,18 @@
 #define TILE_WAVE			0x2E
 #define TILE_HATCHING		0x4E
 
+// Keyboard Input
+#define KEY_UP				0x00
+#define KEY_DOWN			0x01
+#define KEY_LEFT			0x02
+#define KEY_RIGHT			0x03
+#define KEY_W 				0x04
+#define KEY_S				0x05
+#define KEY_A 				0x06
+#define KEY_D 				0x07
+#define KEY_PERIOD 			0x08
+#define KEY_COMMA 			0x09
+
 // Networking
 #define PORT                42000
 #define BUFFER_SIZE         512

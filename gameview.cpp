@@ -344,38 +344,34 @@ void GameView::timerEvent(QTimerEvent *event)
 
 void GameView::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Left) {
-        _game.set_control(CONTROL_WEST, true);
-    } else if (event->key() == Qt::Key_Right) {
-        _game.set_control(CONTROL_EAST, true);
-    } else if (event->key() == Qt::Key_Up) {
-        _game.set_control(CONTROL_NORTH, true);
-    } else if (event->key() == Qt::Key_Down) {
-        _game.set_control(CONTROL_SOUTH, true);
-    } else if (event->key() == Qt::Key_Period) {
-        _game.set_control(CONTROL_DOWN, true);
-    } else if (event->key() == Qt::Key_Comma) {
-        _game.set_control(CONTROL_UP, true);
-    } else {
-        QGLWidget::keyPressEvent(event);
+    switch (event->key()) {
+        case Qt::Key_Left: _game.key_down(KEY_LEFT); break;
+        case Qt::Key_Right: _game.key_down(KEY_RIGHT); break;
+        case Qt::Key_Up: _game.key_down(KEY_UP); break;
+        case Qt::Key_Down: _game.key_down(KEY_DOWN); break;
+        case Qt::Key_Comma: _game.key_down(KEY_COMMA); break;
+        case Qt::Key_Period: _game.key_down(KEY_PERIOD); break;
+        case Qt::Key_W: _game.key_down(KEY_W); break;
+        case Qt::Key_A: _game.key_down(KEY_A); break;
+        case Qt::Key_S: _game.key_down(KEY_S); break;
+        case Qt::Key_D: _game.key_down(KEY_D); break;
+        default: QGLWidget::keyPressEvent(event);
     }
 }
 
 void GameView::keyReleaseEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Left) {
-        _game.set_control(CONTROL_WEST, false);
-    } else if (event->key() == Qt::Key_Right) {
-        _game.set_control(CONTROL_EAST, false);
-    } else if (event->key() == Qt::Key_Up) {
-        _game.set_control(CONTROL_NORTH, false);
-    } else if (event->key() == Qt::Key_Down) {
-        _game.set_control(CONTROL_SOUTH, false);
-    } else if (event->key() == Qt::Key_Period) {
-        _game.set_control(CONTROL_DOWN, false);
-    } else if (event->key() == Qt::Key_Comma) {
-        _game.set_control(CONTROL_UP, false);
-    } else {
-        QGLWidget::keyPressEvent(event);
+    switch (event->key()) {
+        case Qt::Key_Left: _game.key_up(KEY_LEFT); break;
+        case Qt::Key_Right: _game.key_up(KEY_RIGHT); break;
+        case Qt::Key_Up: _game.key_up(KEY_UP); break;
+        case Qt::Key_Down: _game.key_up(KEY_DOWN); break;
+        case Qt::Key_Comma: _game.key_up(KEY_COMMA); break;
+        case Qt::Key_Period: _game.key_up(KEY_PERIOD); break;
+        case Qt::Key_W: _game.key_up(KEY_W); break;
+        case Qt::Key_A: _game.key_up(KEY_A); break;
+        case Qt::Key_S: _game.key_up(KEY_S); break;
+        case Qt::Key_D: _game.key_up(KEY_D); break;
+        default: QGLWidget::keyPressEvent(event);
     }
 }
 

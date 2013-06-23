@@ -21,6 +21,10 @@ SOURCES += main.cpp\
            Noise2D.cpp \
            Network.cpp \
            VirtualConnection.cpp \
+           PlayerView.cpp \
+           PlayerInput.cpp \
+           GameClient.cpp \
+           GameServer.cpp
 
 HEADERS += mainwindow.h \
            gameview.h \
@@ -30,5 +34,9 @@ HEADERS += mainwindow.h \
            defines.h \
            Network.h \
            VirtualConnection.h \
+           PlayerView.h \
+           PlayerInput.h \
+           GameClient.h \
+           GameServer.h
 
 RESOURCES = resources.qrc
