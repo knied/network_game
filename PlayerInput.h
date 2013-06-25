@@ -1,9 +1,9 @@
 #include <vector>
 
 class PlayerInput {
-	enum {HEADER_SIZE = 1};
-	enum {MAX_EVENTS = 255};
-	enum {STATE_SIZE = 16};
+    enum {HEADER_SIZE = 1};
+    enum {MAX_EVENTS = 255};
+    enum {STATE_SIZE = 16};
 
 public:
 	struct KeyEvent {
@@ -15,7 +15,7 @@ public:
 		: key(key), down(down) {}
 	};
 
-	enum {MAX_SERIALIZE_SIZE = HEADER_SIZE + MAX_EVENTS + STATE_SIZE};
+    enum {MAX_SERIALIZE_SIZE = HEADER_SIZE + MAX_EVENTS + STATE_SIZE};
 
 private:
 	std::vector<KeyEvent> _key_events;
@@ -87,7 +87,7 @@ public:
 			return;
 		}
 		unsigned int event_count = data[0];
-		if (size != HEADER_SIZE + event_count + STATE_SIZE) {
+        if (size != HEADER_SIZE + event_count + STATE_SIZE) {
 			std::cerr << "WARNING: Wrong packet size." << std::endl;
 			return;
 		}

@@ -9,20 +9,20 @@ Connection::Connection()
 bool Connection::IsRecent(unsigned int newSeqNo) {
     // No wrap around OR wrap around and out of order
     if (newSeqNo > _ackNo) {
-        return ((newSeqNo - _ackNo) < MAX_SEQ_DISTANCE/2);
+        return ((newSeqNo - _ackNo) < NET_MAX_SEQ_DISTANCE/2);
     // Wrap around OR no wrap around and out of order
     } else {
-        return ((_ackNo - newSeqNo) > MAX_SEQ_DISTANCE/2);
+        return ((_ackNo - newSeqNo) > NET_MAX_SEQ_DISTANCE/2);
     }
 
-    return ((newSeqNo > _ackNo) || ((_ackNo - newSeqNo) > MAX_SEQ_DISTANCE/2));
+    return ((newSeqNo > _ackNo) || ((_ackNo - newSeqNo) > NET_MAX_SEQ_DISTANCE/2));
 }
 
 bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char* packet, int& packetSize) {
     char *tmpPacketPtr = packet;
 
     // Verfiy the packet size
-    if ((packetSize = (bodySize + HEADER_SIZE)) > MAX_PACKET_SIZE) {
+    if ((packetSize = (bodySize + NET_HEADER_SIZE)) > NET_MAX_PACKET_SIZE) {
 #ifdef DEBUG
         std::cout << "The packet size is too large (" << packetSize << ") bytes" << std::endl;
 #endif
@@ -30,7 +30,7 @@ bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char
     }
 
     // Insert the protocol ID
-    *((unsigned int*) tmpPacketPtr) = PROTOCOL_ID;
+    *((unsigned int*) tmpPacketPtr) = NET_PROTOCOL_ID;
     tmpPacketPtr += 4;
 
     // Pre-increment and insert the SEQ number
@@ -58,14 +58,14 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
     ** Verify the packet size
     */
 
-    if (packetSize > MAX_PACKET_SIZE) {
+    if (packetSize > NET_MAX_PACKET_SIZE) {
 #ifdef DEBUG
         std::cout << "The received packet is too large." << std::endl;
 #endif
         return false;
     }
     // Size of received body
-    bodySize = packetSize - HEADER_SIZE;
+    bodySize = packetSize - NET_HEADER_SIZE;
 #ifdef DEBUG
     std::cout << "Received a packet of " << bodySize << " bytes." << std::endl;
 #endif
@@ -77,7 +77,7 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
     unsigned int receivedProtocolID = *((unsigned int*) packet);
     packet += 4;
     // Does it match?
-    if (receivedProtocolID != PROTOCOL_ID) {
+    if (receivedProtocolID != NET_PROTOCOL_ID) {
 #ifdef DEBUG
         std::cout << "The received protocol ID does not match.";
 #endif
@@ -102,7 +102,7 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
         if (recvdSeqNo > _ackNo) {
             distance = recvdSeqNo - _ackNo;
         } else {
-            distance = MAX_SEQ_DISTANCE - (_ackNo - recvdSeqNo);
+            distance = NET_MAX_SEQ_DISTANCE - (_ackNo - recvdSeqNo);
         }
 #ifdef DEBUG
         std::cout << " (recent)" << std::endl
@@ -118,7 +118,7 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
     } else {
         // Calculate SEQ distance
         if (recvdSeqNo > _ackNo) {
-            distance = MAX_SEQ_DISTANCE - (recvdSeqNo - _ackNo);
+            distance = NET_MAX_SEQ_DISTANCE - (recvdSeqNo - _ackNo);
         } else {
             distance = (_ackNo - recvdSeqNo);
         }
