@@ -1,5 +1,5 @@
-#include "PlayerView.h"
-#include "PlayerInput.h"
+#include "../PlayerView.h"
+#include "../PlayerInput.h"
 
 struct Color {
     unsigned char r, g, b, a;

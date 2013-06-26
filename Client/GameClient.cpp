@@ -1,5 +1,5 @@
 #include "GameClient.h"
-#include "defines.h"
+#include "../defines.h"
 
 GameClient::GameClient() {
 	// initialize colors

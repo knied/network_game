@@ -1,6 +1,6 @@
 #include "game.h"
 //#include "Display.h"
-#include "defines.h"
+#include "../defines.h"
 
 Game::Game() :
 //_width(24), _height(24),

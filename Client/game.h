@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <iostream>
-#include "World.h"
-#include "PlayerView.h"
-#include "PlayerInput.h"
+#include "../World.h"
+#include "../PlayerView.h"
+#include "../PlayerInput.h"
 
 struct Color {
     unsigned char r, g, b, a;

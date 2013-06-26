@@ -17,26 +17,24 @@ SOURCES += main.cpp\
            mainwindow.cpp \
            gameview.cpp \
            game.cpp \
-           World.cpp \
-           Noise2D.cpp \
-           Network.cpp \
-           VirtualConnection.cpp \
-           PlayerView.cpp \
-           PlayerInput.cpp \
-           GameClient.cpp \
-           GameServer.cpp
+           ../World.cpp \
+           ../Noise2D.cpp \
+           ../Network.cpp \
+           ../VirtualConnection.cpp \
+           ../PlayerView.cpp \
+           ../PlayerInput.cpp \
+           GameClient.cpp
 
 HEADERS += mainwindow.h \
            gameview.h \
            game.h \
-           World.h \
-           Noise2D.h \
-           defines.h \
-           Network.h \
-           VirtualConnection.h \
-           PlayerView.h \
-           PlayerInput.h \
-           GameClient.h \
-           GameServer.h
+           ../World.h \
+           ../Noise2D.h \
+           ../defines.h \
+           ../Network.h \
+           ../VirtualConnection.h \
+           ../PlayerView.h \
+           ../PlayerInput.h \
+           GameClient.h
 
 RESOURCES = resources.qrc
