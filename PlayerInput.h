@@ -1,3 +1,6 @@
+#ifndef PLAYER_INPUT_H_
+#define PLAYER_INPUT_H_
+
 #include <vector>
 
 class PlayerInput {
@@ -103,3 +106,5 @@ public:
 		}
 	}
 };
+
+#endif

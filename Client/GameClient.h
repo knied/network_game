@@ -1,5 +1,6 @@
 #include "../PlayerView.h"
 #include "../PlayerInput.h"
+#include "../Server/GameServer.h"
 
 struct Color {
     unsigned char r, g, b, a;
@@ -28,7 +29,8 @@ private:
 
 	Color _colors[256];
 
-	float _draw_acumulator;
+    GameServer _server;
+    float _server_timer;
 
 public:
 	enum {MAX_SERIALIZE_SIZE = PlayerInputType::MAX_SERIALIZE_SIZE};

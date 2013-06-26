@@ -1,7 +1,7 @@
 #include "GameClient.h"
 #include "../defines.h"
 
-GameClient::GameClient() {
+GameClient::GameClient() : _server_timer(0.0f) {
 	// initialize colors
     _colors[COLOR_BLACK] = Color(0, 0, 0, 255);
     _colors[COLOR_WHITE] = Color(255, 255, 255, 255);
@@ -21,6 +21,23 @@ GameClient::GameClient() {
 }
 
 void GameClient::update(float dt) {
+    _server.update(dt);
+
+    _server_timer += dt;
+    if (_server_timer >= 0.05f) {
+        _server_timer = 0.0f;
+
+        unsigned char view_data[MAX_DESERIALIZE_SIZE];
+        unsigned int view_size = 0;
+        _server.serialize(view_data, view_size, 0);
+        deserialize(view_data, view_size);
+
+        unsigned char input_data[MAX_SERIALIZE_SIZE];
+        unsigned int input_size = 0;
+        serialize(input_data, input_size);
+        _server.deserialize(input_data, input_size, 0);
+    }
+
 	// TODO: network stuff
 }
 

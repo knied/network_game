@@ -18,11 +18,11 @@ GameView::GameView(const QGLFormat& format, QWidget *parent) :
 }
 
 int GameView::prefered_width() const {
-    return _game.width() * _tile_size ;
+    return GameClient::ViewWidth * _tile_size ;
 }
 
 int GameView::prefered_height() const {
-    return _game.height() * _tile_size;
+    return GameClient::ViewHeight * _tile_size;
 }
 
 void GameView::compile_shader(GLuint shader_identifier, const std::string& shader_source) {
@@ -61,9 +61,9 @@ void GameView::link_program() {
 }
 
 void GameView::update_vertex_buffer() {
-    std::vector<Vertex> vertex_data(_game.width() * _game.height() * 6);
-    for(int y = 0; y < _game.height(); ++y) {
-        for(int x = 0; x < _game.width(); ++x) {
+    std::vector<Vertex> vertex_data(GameClient::ViewWidth * GameClient::ViewHeight * 6);
+    for(int y = 0; y < GameClient::ViewHeight; ++y) {
+        for(int x = 0; x < GameClient::ViewWidth; ++x) {
             float tmp = 1.0f / 16.0f;
 
             int tile_x = _game.player_view().symbol(x, y) % 16;
@@ -91,21 +91,21 @@ void GameView::update_vertex_buffer() {
             Color color0 = _game.color(_game.player_view().symbol_color(x, y));
             Color color1 = _game.color(_game.player_view().background_color(x, y));
 
-            float x_offset = -(float)_game.width() / 2.0f * (float)_tile_size;
-            float y_offset = -(float)_game.height() / 2.0f * (float)_tile_size;
+            float x_offset = -(float)GameClient::ViewWidth / 2.0f * (float)_tile_size;
+            float y_offset = -(float)GameClient::ViewHeight / 2.0f * (float)_tile_size;
 
             Vertex vertex0 = {(float)(x) * (float)_tile_size + x_offset, (float)(y+1) * (float)_tile_size + y_offset, 0.0f, u0, v0, color0, color1};
             Vertex vertex1 = {(float)(x+1) * (float)_tile_size + x_offset, (float)(y+1) * (float)_tile_size + y_offset, 0.0f, u1, v0, color0, color1};
             Vertex vertex2 = {(float)(x+1) * (float)_tile_size + x_offset, (float)(y) * (float)_tile_size + y_offset, 0.0f, u1, v1, color0, color1};
             Vertex vertex3 = {(float)(x) * (float)_tile_size + x_offset, (float)(y) * (float)_tile_size + y_offset, 0.0f, u0, v1, color0, color1};
 
-            vertex_data[6 * _game.width() * y + 6 * x + 0] = vertex0;
-            vertex_data[6 * _game.width() * y + 6 * x + 1] = vertex1;
-            vertex_data[6 * _game.width() * y + 6 * x + 2] = vertex2;
+            vertex_data[6 * GameClient::ViewWidth * y + 6 * x + 0] = vertex0;
+            vertex_data[6 * GameClient::ViewWidth * y + 6 * x + 1] = vertex1;
+            vertex_data[6 * GameClient::ViewWidth * y + 6 * x + 2] = vertex2;
 
-            vertex_data[6 * _game.width() * y + 6 * x + 3] = vertex0;
-            vertex_data[6 * _game.width() * y + 6 * x + 4] = vertex2;
-            vertex_data[6 * _game.width() * y + 6 * x + 5] = vertex3;
+            vertex_data[6 * GameClient::ViewWidth * y + 6 * x + 3] = vertex0;
+            vertex_data[6 * GameClient::ViewWidth * y + 6 * x + 4] = vertex2;
+            vertex_data[6 * GameClient::ViewWidth * y + 6 * x + 5] = vertex3;
         }
     }
 
@@ -318,7 +318,7 @@ void GameView::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(_program_identifier);
     glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLES, 0, _game.width() * _game.height() * 6);
+    glDrawArrays(GL_TRIANGLES, 0, GameClient::ViewWidth * GameClient::ViewHeight * 6);
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {

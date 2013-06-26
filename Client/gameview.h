@@ -8,7 +8,7 @@
 #include <vector>
 #include <sys/time.h>
 
-#include "game.h"
+#include "GameClient.h"
 
 class GameView : public QGLWidget
 {
@@ -34,7 +34,7 @@ private:
 
     int _tile_size;
 
-    Game _game;
+    GameClient _game;
     timeval _lastTime;
 
     int _timer_id;
