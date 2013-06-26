@@ -218,7 +218,7 @@ void view_from_position(PlayerView<ViewWidth, ViewHeight>& result,
 
                 // Show players
                 int z = position_z;
-                while(world.at(x, y, z) == BLOCK_VOID) {
+                while(z > 0 && world.transparent(x_index, y_index, z)) {
                     bool found = false;
                     for (unsigned int i = 0; i < players.size(); ++i) {
                         if (players[i].x == x_index && players[i].y == y_index && players[i].z == z) {
