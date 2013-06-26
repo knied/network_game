@@ -9,7 +9,8 @@ SOURCES += main.cpp GameServer.cpp \
     ../PlayerView.cpp \
     ../PlayerInput.cpp \
     ../Noise2D.cpp \
-    ../Network.cpp
+    ../Network.cpp \
+    NetworkServer.cpp
 
 HEADERS += \
     GameServer.h \
@@ -19,5 +20,6 @@ HEADERS += \
     ../PlayerInput.h \
     ../Noise2D.h \
     ../Network.h \
-    ../defines.h
+    ../defines.h \
+    NetworkServer.h
 
