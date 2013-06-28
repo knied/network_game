@@ -30,7 +30,7 @@ private:
 	Color _colors[256];
 
     GameServer _server;
-    float _server_timer;
+    //float _server_timer;
 
 public:
 	enum {MAX_SERIALIZE_SIZE = PlayerInputType::MAX_SERIALIZE_SIZE};

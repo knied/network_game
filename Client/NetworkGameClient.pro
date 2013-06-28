@@ -24,7 +24,9 @@ SOURCES += main.cpp\
            ../PlayerInput.cpp \
            GameClient.cpp \
     ../Server/GameServer.cpp \
-    NetworkClient.cpp
+    NetworkClient.cpp \
+    ../Entity.cpp \
+    ../PlayerController.cpp
 
 HEADERS += mainwindow.h \
            gameview.h \
@@ -37,6 +39,8 @@ HEADERS += mainwindow.h \
            ../PlayerInput.h \
            GameClient.h \
     ../Server/GameServer.h \
-    NetworkClient.h
+    NetworkClient.h \
+    ../Entity.h \
+    ../PlayerController.h
 
 RESOURCES = resources.qrc

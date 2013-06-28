@@ -1,112 +1,9 @@
 #include "GameServer.h"
 
-DirControl::DirControl() : _state_a(false), _state_b(false), _acumulator(0.0f) {}
-
-void DirControl::update(float dt) {
-    int dir = (_state_a ? 1 : 0) - (_state_b ? 1 : 0);
-    _acumulator += 10.0f * (float)dir * dt;
-}
-
-int DirControl::get() {
-    if (_acumulator >= 1.0f)
-    {
-        _acumulator = 0.0f;
-        return 1;
-    } else if (_acumulator <= -1.0f) {
-        _acumulator = 0.0f;
-        return -1;
-    }
-    return 0;
-}
-void DirControl::set_a(bool state) {
-    if (state && !_state_a)
-    {
-        _acumulator = 1.0f;
-    }
-    _state_a = state;
-}
-void DirControl::set_b(bool state) {
-    if (state && !_state_b)
-    {
-        _acumulator = -1.0f;
-    }
-    _state_b = state;
-}
-
-void move_entity(int &x, int &y, int &z, const World& world, int diff_x, int diff_y, int diff_z) {
-    int new_position_x = x + diff_x;
-    int new_position_y = y + diff_y;
-    int new_position_z = z + diff_z;
-
-    if (new_position_x < 0) {
-        new_position_x = 0;
-    }
-    if (new_position_x >= world.width()) {
-        new_position_x = world.width() - 1;
-    }
-
-    if (new_position_y < 0) {
-        new_position_y = 0;
-    }
-    if (new_position_y >= world.height()) {
-        new_position_y = world.height() - 1;
-    }
-
-    if (new_position_z < 0) {
-        new_position_z = 0;
-    }
-    if (new_position_z >= world.depth()) {
-        new_position_z = world.depth() - 1;
-    }
-
-    // handle movement on the same level
-    if (world.at(new_position_x, new_position_y, z) != BLOCK_VOID &&
-        world.at(new_position_x, new_position_y, z) != BLOCK_LADDER) {
-        // blocked, can we go up?
-        if (world.at(x, y, z) != BLOCK_LADDER)
-        {
-            new_position_z = z + 1;
-            if (world.at(new_position_x, new_position_y, z + 1) != BLOCK_VOID &&
-                world.at(new_position_x, new_position_y, z + 1) != BLOCK_LADDER) {
-                // collision -> do not move
-                new_position_x = x;
-                new_position_y = y;
-            }
-        } else {
-            // collision -> do not move
-            new_position_x = x;
-            new_position_y = y;
-        }
-    }
-
-    // handle movement in vertical direction
-    if (world.at(new_position_x, new_position_y, new_position_z) != BLOCK_VOID &&
-        world.at(new_position_x, new_position_y, new_position_z) != BLOCK_LADDER) {
-        new_position_z = z;
-    }
-
-    x = new_position_x;
-    y = new_position_y;
-    z = new_position_z;
-
-    // are we falling?
-    if (world.at(x, y, z - 1) == BLOCK_VOID && world.at(x, y, z) != BLOCK_LADDER) {
-        // we are!
-        z--;
-    }
-
-    if (z < 0) {
-        z = 0;
-    }
-    if (z >= world.depth()) {
-        z = world.depth() - 1;
-    }
-}
-
 template<unsigned int ViewWidth, unsigned int ViewHeight>
 void view_from_position(PlayerView<ViewWidth, ViewHeight>& result,
                         const World& world,
-                        const std::vector<Player<PlayerView<ViewWidth, ViewHeight>, PlayerInput> >& players,
+                        const std::vector<PlayerController>& players,
                         const int position_x,
                         const int position_y,
                         const int position_z) {
@@ -221,7 +118,7 @@ void view_from_position(PlayerView<ViewWidth, ViewHeight>& result,
                 while(z > 0 && world.transparent(x_index, y_index, z)) {
                     bool found = false;
                     for (unsigned int i = 0; i < players.size(); ++i) {
-                        if (players[i].x == x_index && players[i].y == y_index && players[i].z == z) {
+                        if (players[i].x() == x_index && players[i].y() == y_index && players[i].z() == z) {
                             result.set_symbol(x, y, TILE_GUY, false, false);
                             result.set_symbol_color(x, y, COLOR_PLAYER0);
                             found = true;
@@ -245,7 +142,7 @@ void view_from_position(PlayerView<ViewWidth, ViewHeight>& result,
 }
 
 void GameServer::spawn_player(unsigned int identifier) {
-    _players.push_back(Player<PlayerViewType, PlayerInputType>(identifier, _world));
+    _players.push_back(PlayerController(identifier, _world));
 }
 
 GameServer::GameServer()
@@ -253,56 +150,22 @@ GameServer::GameServer()
 }
 
 void GameServer::update(float dt) {
-    // Update the controls
-    for (unsigned int i = 0; i < _players.size(); ++i) {
-        _players[i].control_north_south.update(dt);
-        _players[i].control_west_east.update(dt);
-        _players[i].control_up_down.update(dt);
-
-        PlayerInputType::KeyEvent event;
-        while (_players[i].input.next_event(event)) {
-            switch (event.key) {
-            case KEY_A: case KEY_LEFT: _players[i].control_west_east.set_b(event.down); break;
-            case KEY_D: case KEY_RIGHT: _players[i].control_west_east.set_a(event.down); break;
-            case KEY_W: case KEY_UP: _players[i].control_north_south.set_a(event.down); break;
-            case KEY_S: case KEY_DOWN: _players[i].control_north_south.set_b(event.down); break;
-            case KEY_COMMA: _players[i].control_up_down.set_a(event.down); break;
-            case KEY_PERIOD: _players[i].control_up_down.set_b(event.down); break;
-            }
-        }
-
-        // to recover from lost packets: update controls with the current key state
-        _players[i].control_west_east.set_b(_players[i].input.key_state(KEY_A) || _players[i].input.key_state(KEY_LEFT));
-        _players[i].control_west_east.set_a(_players[i].input.key_state(KEY_D) || _players[i].input.key_state(KEY_RIGHT));
-        _players[i].control_north_south.set_a(_players[i].input.key_state(KEY_W) || _players[i].input.key_state(KEY_UP));
-        _players[i].control_north_south.set_b(_players[i].input.key_state(KEY_S) || _players[i].input.key_state(KEY_DOWN));
-        _players[i].control_up_down.set_a(_players[i].input.key_state(KEY_COMMA));
-        _players[i].control_up_down.set_b(_players[i].input.key_state(KEY_PERIOD));
-
-        // update player position
-        move_entity(_players[i].x, _players[i].y, _players[i].z,
-                    _world,
-                    _players[i].control_west_east.get(),
-                    _players[i].control_north_south.get(),
-                    _players[i].control_up_down.get());
-    }
-
-
     _update_timer += dt;
     if (_update_timer > 0.1f) {
         _update_timer = 0.0f;
 
         for (unsigned int i = 0; i < _players.size(); ++i) {
             // update the players view
-            view_from_position(_players[i].view, _world, _players, _players[i].x, _players[i].y, _players[i].z);
+            view_from_position(_players[i].view(), _world, _players, _players[i].x(), _players[i].y(), _players[i].z());
+            _players[i].update(_world);
         }
     }
 }
 
 void GameServer::serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int& size, unsigned int player_identifier) {
-    std::vector<Player<PlayerViewType, PlayerInputType> >::iterator it;
+    std::vector<PlayerController>::iterator it;
     for (it = _players.begin(); it != _players.end(); ++it) {
-        if (it->identifier == player_identifier) {
+        if (it->identifier() == player_identifier) {
             break;
         }
     }
@@ -310,13 +173,13 @@ void GameServer::serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int&
         spawn_player(player_identifier);
         it = _players.end() - 1;
     }
-    it->view.serialize(data, size);
+    it->view().serialize(data, size);
 }
 
 void GameServer::deserialize(const unsigned char data[MAX_DESERIALIZE_SIZE], const unsigned int size, unsigned int player_identifier) {
-    std::vector<Player<PlayerViewType, PlayerInputType> >::iterator it;
+    std::vector<PlayerController>::iterator it;
     for (it = _players.begin(); it != _players.end(); ++it) {
-        if (it->identifier == player_identifier) {
+        if (it->identifier() == player_identifier) {
             break;
         }
     }
@@ -324,5 +187,6 @@ void GameServer::deserialize(const unsigned char data[MAX_DESERIALIZE_SIZE], con
         spawn_player(player_identifier);
         it = _players.end() - 1;
     }
-    it->input.deserialize(data, size);
+    it->input().deserialize(data, size);
+    it->handle_input();
 }
