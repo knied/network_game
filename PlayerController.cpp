@@ -12,7 +12,8 @@ void PlayerController::draw_controls(unsigned int y, std::vector<Entity>& entiti
         if (_selected < 8) {
             item = (_entity.inventory())[_selected];
         } else {
-            item = (entities[_other_entity].inventory())[_selected - 8];
+            //item = (entities[_other_entity].inventory())[_selected - 8];
+            item = _locked_entity.entity()->inventory()[_selected - 8];
         }
         if (item == ITEM_POTION) {
             _view.set_symbol_color(2,y-1,COLOR_WHITE);
@@ -23,9 +24,25 @@ void PlayerController::draw_controls(unsigned int y, std::vector<Entity>& entiti
             _view.set_symbol(2,y-2,TILE_RIGHT,false,false);
             _view.set_text(3,y-2,": Drink", COLOR_BLACK, COLOR_WHITE);
         } else if (item == ITEM_SWORD) {
-            _view.set_symbol_color(2,y-1,COLOR_WHITE);
-            _view.set_symbol(2,y-1,TILE_RIGHT,true,false);
-            _view.set_text(3,y-1,": Grab", COLOR_BLACK, COLOR_WHITE);
+            if (_selected < 8) {
+                if (_equiped != _selected) {
+                    _view.set_symbol_color(2,y-1,COLOR_WHITE);
+                    _view.set_symbol(2,y-1,TILE_RIGHT,true,false);
+                    _view.set_text(3,y-1,": Grab", COLOR_BLACK, COLOR_WHITE);
+
+                    _view.set_symbol_color(2,y-2,COLOR_WHITE);
+                    _view.set_symbol(2,y-2,TILE_RIGHT,false,false);
+                    _view.set_text(3,y-2,": Equip", COLOR_BLACK, COLOR_WHITE);
+                } else {
+                    _view.set_symbol_color(2,y-1,COLOR_WHITE);
+                    _view.set_symbol(2,y-1,TILE_RIGHT,true,false);
+                    _view.set_text(3,y-1,": Unequip", COLOR_BLACK, COLOR_WHITE);
+                }
+            } else {
+                _view.set_symbol_color(2,y-1,COLOR_WHITE);
+                _view.set_symbol(2,y-1,TILE_RIGHT,true,false);
+                _view.set_text(3,y-1,": Grab", COLOR_BLACK, COLOR_WHITE);
+            }
         }
 
     } else {
@@ -199,7 +216,7 @@ void PlayerController::create_inventory_view(std::vector<Entity>& entities) {
         }
     }
     // draw side lines
-    for (unsigned int y = (_other_entity_accessable ? 6 : 15); y < ViewHeight; ++y) {
+    for (unsigned int y = (_locked_entity.entity() != 0 ? 6 : 15); y < ViewHeight; ++y) {
         _view.set_background_color(0, y, COLOR_BLACK);
         _view.set_symbol_color(0, y, COLOR_WHITE);
         _view.set_symbol(0, y, TILE_FRAME_TB, false, false);
@@ -239,9 +256,9 @@ void PlayerController::create_inventory_view(std::vector<Entity>& entities) {
         default: item_name = "---"; break;
         }
         if (line == _selected) {
-            _view.set_text(22 - item_name.length() - (_active_item != ITEM_NONE ? 2 : 0), 22 - i, item_name, COLOR_WHITE, COLOR_BLACK);
+            _view.set_text(22 - item_name.length() - (_active_item != ITEM_NONE ? 2 : 0), 22 - i, item_name, COLOR_WHITE, ((int)i == _equiped ? COLOR_GREEN : COLOR_BLACK));
         } else {
-            _view.set_text(22 - item_name.length(), 22 - i, item_name, COLOR_BLACK, COLOR_WHITE);
+            _view.set_text(22 - item_name.length(), 22 - i, item_name, COLOR_BLACK, ((int)i == _equiped ? COLOR_GREEN : COLOR_WHITE));
         }
         line++;
     }
@@ -249,7 +266,7 @@ void PlayerController::create_inventory_view(std::vector<Entity>& entities) {
     // draw player health
     draw_health_bar(2, 22);
 
-    if (_other_entity_accessable) {
+    if (_locked_entity.entity() != 0) {
         // draw middle line
         _view.set_background_color(0, 14, COLOR_BLACK);
         _view.set_symbol_color(0, 14, COLOR_WHITE);
@@ -267,7 +284,8 @@ void PlayerController::create_inventory_view(std::vector<Entity>& entities) {
         // draw chest item names
         for (unsigned int i = 0; i < 8; i++) {
             std::string item_name = "---";
-            unsigned char item = (entities[_other_entity].inventory())[i];
+            //unsigned char item = (entities[_other_entity].inventory())[i];
+            unsigned char item = _locked_entity.entity()->inventory()[i];
             if (line == _selected && _active_item != ITEM_NONE) {
                 item = _active_item;
             }
@@ -317,15 +335,15 @@ void PlayerController::create_inventory_view(std::vector<Entity>& entities) {
 
 PlayerController::PlayerController(unsigned int identifier, const Entity& entity)
     : _identifier(identifier), _entity(entity), _north(0), _south(0), _west(0), _east(0), _up(0), _down(0), _in_inventory(false), _selected(0), _active_item(ITEM_NONE) {
-    (_entity.inventory())[0] = ITEM_SWORD;
-    (_entity.inventory())[1] = ITEM_POTION;
-    _entity.hurt();
-    _entity.hurt();
     _view_dir = ViewDown;
     _switch_inventory = false;
-    _other_entity_accessable = false;
+    //_other_entity_accessable = false;
     _entity.lock_inventory();
     _deal_damage = false;
+    _equiped = -1;
+
+    //_entity.inventory()[0] = ITEM_SWORD;
+    //_entity.inventory()[1] = ITEM_POTION;
 }
 
 PlayerController::~PlayerController() {
@@ -347,7 +365,8 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
                     (_entity.inventory())[_selected] = _active_item;
                     _active_item = ITEM_NONE;
                 } else {
-                    (entities[_other_entity].inventory())[_selected - 8] = _active_item;
+                    //(entities[_other_entity].inventory())[_selected - 8] = _active_item;
+                    _locked_entity.entity()->inventory()[_selected - 8] = _active_item;
                     _active_item = ITEM_NONE;
                 }
             }
@@ -377,13 +396,29 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
 
         if (_deal_damage) {
             int look_at_x = _entity.x();
+            int look_at_y = _entity.y();
+
             if (_view_dir == ViewLeft) look_at_x--;
             if (_view_dir == ViewRight) look_at_x++;
-            int look_at_y = _entity.y();
             if (_view_dir == ViewDown) look_at_y--;
             if (_view_dir == ViewUp) look_at_y++;
-
             _entity.deal_damage(look_at_x, look_at_y, _entity.z());
+            if (_equiped >= 0 && _entity.inventory()[_equiped] == ITEM_SWORD) {
+                // increase range
+                if (_view_dir == ViewLeft) look_at_x--;
+                if (_view_dir == ViewRight) look_at_x++;
+                if (_view_dir == ViewDown) look_at_y--;
+                if (_view_dir == ViewUp) look_at_y++;
+
+                _entity.deal_damage(look_at_x, look_at_y, _entity.z());
+
+                if (rand() % 20 == 0) {
+                    // the sword breaks
+                    _entity.inventory()[_equiped] = ITEM_NONE;
+                    _equiped = -1;
+                }
+            }
+
         } else {
             // move the players entity
             _entity.move(_east - _west,
@@ -395,23 +430,27 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
     }
 
     // can we see an other entities inventory?
-    if (_other_entity_accessable) entities[_other_entity].unlock_inventory();
-    _other_entity = 0;
-    _other_entity_accessable = false;
+    //if (_other_entity_accessable) entities[_other_entity].unlock_inventory();
+    //_other_entity = 0;
+    //_other_entity_accessable = false;
+    //_locked_entity = EntityLock();
+    _locked_entity.unlock();
     int look_at_x = _entity.x();
     if (_view_dir == ViewLeft) look_at_x--;
     if (_view_dir == ViewRight) look_at_x++;
     int look_at_y = _entity.y();
     if (_view_dir == ViewDown) look_at_y--;
     if (_view_dir == ViewUp) look_at_y++;
-    for (;_other_entity < entities.size(); ++_other_entity) {
-        if (entities[_other_entity].x() == look_at_x &&
-            entities[_other_entity].y() == look_at_y &&
-            entities[_other_entity].z() == _entity.z() &&
-            !entities[_other_entity].inventory_locked()) {
-            _other_entity_accessable = true;
+    for (unsigned int i = 0; i < entities.size(); ++i) {
+        if (entities[i].x() == look_at_x &&
+            entities[i].y() == look_at_y &&
+            entities[i].z() == _entity.z() &&
+            !entities[i].inventory_locked()) {
+            //_other_entity_accessable = true;
             if (_in_inventory) {
-                entities[_other_entity].lock_inventory();
+                //entities[_other_entity].lock_inventory();
+                //_locked_entity = EntityLock(entities[i]);
+                _locked_entity.lock(entities[i]);
             }
             break;
         }
@@ -420,7 +459,7 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
     if (_in_inventory) {
         _selected -= _north - _south;
         _lines = 8;
-        if (_other_entity_accessable) _lines = 16;
+        if (_locked_entity.entity() != 0) _lines = 16;
         if (_selected < 0) _selected = _lines-1;
         if (_selected >= _lines) _selected = 0;
 
@@ -431,7 +470,8 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
                 if (_selected < 8) {
                     selection_clear = (_entity.inventory())[_selected] == ITEM_NONE;
                 } else {
-                    selection_clear = (entities[_other_entity].inventory())[_selected - 8] == ITEM_NONE;
+                    //selection_clear = (entities[_other_entity].inventory())[_selected - 8] == ITEM_NONE;
+                    selection_clear = _locked_entity.entity()->inventory()[_selected - 8] == ITEM_NONE;
                 }
 
                 if (!selection_clear) {
@@ -443,14 +483,21 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
         }
 
         if (_east - _west < 0) {
-            if (_active_item == ITEM_NONE) {
-                // activate this item
-                if (_selected < 8) {
-                    _active_item = (_entity.inventory())[_selected];
-                    (_entity.inventory())[_selected] = ITEM_NONE;
-                } else {
-                    _active_item = (entities[_other_entity].inventory())[_selected - 8];
-                    (entities[_other_entity].inventory())[_selected - 8] = ITEM_NONE;
+            if (_equiped == _selected) {
+                // unequip
+                _equiped = -1;
+            } else {
+                if (_active_item == ITEM_NONE) {
+                    // activate this item
+                    if (_selected < 8) {
+                        _active_item = (_entity.inventory())[_selected];
+                        (_entity.inventory())[_selected] = ITEM_NONE;
+                    } else {
+                        //_active_item = (entities[_other_entity].inventory())[_selected - 8];
+                        //(entities[_other_entity].inventory())[_selected - 8] = ITEM_NONE;
+                        _active_item = _locked_entity.entity()->inventory()[_selected - 8];
+                        _locked_entity.entity()->inventory()[_selected - 8] = ITEM_NONE;
+                    }
                 }
             }
         } else if (_east - _west > 0) {
@@ -460,7 +507,8 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
                     (_entity.inventory())[_selected] = _active_item;
                     _active_item = ITEM_NONE;
                 } else {
-                    (entities[_other_entity].inventory())[_selected - 8] = _active_item;
+                    //(entities[_other_entity].inventory())[_selected - 8] = _active_item;
+                    _locked_entity.entity()->inventory()[_selected - 8] = _active_item;
                     _active_item = ITEM_NONE;
                 }
             } else {
@@ -469,10 +517,16 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
                     if ((_entity.inventory())[_selected] == ITEM_POTION) {
                         (_entity.inventory())[_selected] = ITEM_NONE;
                         _entity.heal();
+                    } else if ((_entity.inventory())[_selected] == ITEM_SWORD) {
+                        _equiped = _selected;
                     }
                 } else {
-                    if ((entities[_other_entity].inventory())[_selected - 8] == ITEM_POTION) {
+                    /*if ((entities[_other_entity].inventory())[_selected - 8] == ITEM_POTION) {
                         (entities[_other_entity].inventory())[_selected - 8] = ITEM_NONE;
+                        _entity.heal();
+                    }*/
+                    if (_locked_entity.entity()->inventory()[_selected - 8] == ITEM_POTION) {
+                        _locked_entity.entity()->inventory()[_selected - 8] = ITEM_NONE;
                         _entity.heal();
                     }
                 }

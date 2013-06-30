@@ -34,6 +34,7 @@ class Entity {
     Collision can_move_to(int x, int y, int z, const World& world, const std::vector<Entity>& entities, unsigned int& collider) const;
 
 public:
+    Entity();
     Entity(int x, int y, int z, unsigned char symbol, bool flip_x, bool flip_y, unsigned char color, const World& world);
     Entity(const Entity& entity);
     ~Entity();

@@ -4,6 +4,11 @@ AIController::AIController(unsigned int identifier, const Entity& entity) : _ent
     _view_dir = ViewDown;
     _timer = 0;
     (_entity.inventory())[0] = rand() % 3;
+    _entity.lock_inventory();
+}
+
+AIController::~AIController() {
+    _entity.unlock_inventory();
 }
 
 void AIController::update(const World& world, std::vector<Entity>& entities) {

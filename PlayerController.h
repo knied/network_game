@@ -2,6 +2,50 @@
 #include "../PlayerView.h"
 #include "../PlayerInput.h"
 
+class EntityLock {
+    Entity _entity;
+    bool _locked;
+
+public:
+    EntityLock() {
+        _locked = false;
+    }
+    EntityLock(const EntityLock&) {
+        _locked = false;
+    }
+    const EntityLock& operator = (const EntityLock&) {
+        _locked = false;
+        return *this;
+    }
+
+    /*EntityLock(const Entity& entity) : _entity(entity) {
+        _entity.lock_inventory();
+        _locked = true;
+    }*/
+    ~EntityLock() {
+        unlock();
+    }
+    void lock(const Entity& entity) {
+        if (_locked) unlock();
+        if (entity.inventory_locked()) return;
+        _entity = entity;
+        _entity.lock_inventory();
+        _locked = true;
+    }
+
+    void unlock() {
+        if (_locked) {
+            _entity.unlock_inventory();
+            _locked = false;
+        }
+    }
+
+    Entity* entity() {
+        if (!_locked) return 0;
+        return &_entity;
+    }
+};
+
 class PlayerController {
 public:
     enum {ViewWidth = 24};
@@ -27,8 +71,9 @@ private:
     int _up, _down;
     bool _deal_damage;
 
-    unsigned int _other_entity;
-    bool _other_entity_accessable;
+    //unsigned int _other_entity;
+    //bool _other_entity_accessable;
+    EntityLock _locked_entity;
 
     bool _in_inventory;
     bool _switch_inventory;
@@ -37,6 +82,8 @@ private:
     int _lines;
 
     unsigned char _active_item;
+
+    int _equiped;
 
     ViewDir _view_dir;
 

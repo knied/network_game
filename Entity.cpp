@@ -1,5 +1,22 @@
 #include "Entity.h"
 
+Entity::Entity() : _data(new Data()) {
+    _data->symbol = TILE_NONE;
+    _data->flip_x = false;
+    _data->flip_y = false;
+    _data->color = COLOR_BLACK;
+    _data->x = 0;
+    _data->y = 0;
+    _data->z = 0;
+    _data->colliding = false;
+    _data->references = 1;
+    _data->inventory_locked = false;
+    for (unsigned int i = 0; i < 8; ++i) {
+        _data->inventory[i] = ITEM_NONE;
+    }
+    _data->health = 0;
+}
+
 Entity::Entity(int x, int y, int z, unsigned char symbol, bool flip_x, bool flip_y, unsigned char color, const World& world)
     : _data(new Data()) {
     _data->symbol = symbol;

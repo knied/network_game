@@ -41,6 +41,7 @@
 #define COLOR_PLAYER0		0x0E
 #define COLOR_RED           0x0F
 #define COLOR_CHEST         0x10
+#define COLOR_GREEN           0x11
 
 // Tile IDs, used for visualization
 #define TILE_GUY			0x00

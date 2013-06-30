@@ -14,6 +14,7 @@ class AIController {
 
 public:
     AIController(unsigned int identifier, const Entity& entity);
+    ~AIController();
     void update(const World& world, std::vector<Entity>& entities);
     const Entity& entity() const;
     unsigned int identifier() const;
