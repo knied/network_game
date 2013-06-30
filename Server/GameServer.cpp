@@ -88,6 +88,10 @@ void GameServer::update(float dt) {
 
                     it->clear_damages();
                     it->set_symbol(TILE_CHEST, false, false);
+                    // remove chests, that fall into the water
+                    if (_world.at(it->x(), it->y(), it->z()-1) == BLOCK_WATER) {
+                        break;
+                    }
 
                     bool remove = true;
                     if (it->inventory_locked()) {

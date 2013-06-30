@@ -129,6 +129,8 @@ Entity::Collision Entity::can_move_to(int x, int y, int z, const World& world, c
 void Entity::move(int dx, int dy, int dz, const World& world, const std::vector<Entity>& entities) {
     int new_position_x = _data->x + dx;
     int new_position_y = _data->y + dy;
+    if(world.at(_data->x, _data->y, _data->z) != BLOCK_LADDER && dz > 0) dz = 0;
+    if(world.at(_data->x, _data->y, _data->z - 1) != BLOCK_LADDER && dz < 0) dz = 0;
     int new_position_z = _data->z + dz;
 
     unsigned int collider = 0;

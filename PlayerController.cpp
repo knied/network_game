@@ -20,9 +20,11 @@ void PlayerController::draw_controls(unsigned int y, std::vector<Entity>& entiti
             _view.set_symbol(2,y-1,TILE_RIGHT,true,false);
             _view.set_text(3,y-1,": Grab", COLOR_BLACK, COLOR_WHITE);
 
-            _view.set_symbol_color(2,y-2,COLOR_WHITE);
-            _view.set_symbol(2,y-2,TILE_RIGHT,false,false);
-            _view.set_text(3,y-2,": Drink", COLOR_BLACK, COLOR_WHITE);
+            if (_entity.health() < 5) {
+                _view.set_symbol_color(2,y-2,COLOR_WHITE);
+                _view.set_symbol(2,y-2,TILE_RIGHT,false,false);
+                _view.set_text(3,y-2,": Drink", COLOR_BLACK, COLOR_WHITE);
+            }
         } else if (item == ITEM_SWORD) {
             if (_selected < 8) {
                 if (_equiped != _selected) {
@@ -403,6 +405,7 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
             if (_view_dir == ViewDown) look_at_y--;
             if (_view_dir == ViewUp) look_at_y++;
             _entity.deal_damage(look_at_x, look_at_y, _entity.z());
+            _entity.deal_damage(look_at_x, look_at_y, _entity.z()-1);
             if (_equiped >= 0 && _entity.inventory()[_equiped] == ITEM_SWORD) {
                 // increase range
                 if (_view_dir == ViewLeft) look_at_x--;
@@ -411,6 +414,7 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
                 if (_view_dir == ViewUp) look_at_y++;
 
                 _entity.deal_damage(look_at_x, look_at_y, _entity.z());
+                _entity.deal_damage(look_at_x, look_at_y, _entity.z()-1);
 
                 if (rand() % 20 == 0) {
                     // the sword breaks
@@ -514,7 +518,7 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
             } else {
                 // use item
                 if (_selected < 8) {
-                    if ((_entity.inventory())[_selected] == ITEM_POTION) {
+                    if ((_entity.inventory())[_selected] == ITEM_POTION  && _entity.health() < 5) {
                         (_entity.inventory())[_selected] = ITEM_NONE;
                         _entity.heal();
                     } else if ((_entity.inventory())[_selected] == ITEM_SWORD) {
@@ -525,7 +529,7 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
                         (entities[_other_entity].inventory())[_selected - 8] = ITEM_NONE;
                         _entity.heal();
                     }*/
-                    if (_locked_entity.entity()->inventory()[_selected - 8] == ITEM_POTION) {
+                    if (_locked_entity.entity()->inventory()[_selected - 8] == ITEM_POTION && _entity.health() < 5) {
                         _locked_entity.entity()->inventory()[_selected - 8] = ITEM_NONE;
                         _entity.heal();
                     }
