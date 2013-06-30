@@ -46,6 +46,7 @@ void AIController::update(const World& world, std::vector<Entity>& entities) {
             if (_view_dir == ViewUp) look_at_y++;
 
             _entity.deal_damage(look_at_x, look_at_y, _entity.z());
+            _entity.deal_damage(look_at_x, look_at_y, _entity.z()-1);
         }
     }
 
