@@ -5,6 +5,7 @@
 #include "../PlayerView.h"
 #include "../PlayerInput.h"
 #include "../PlayerController.h"
+#include "../AIController.h"
 
 class GameServer {
 public:
@@ -20,10 +21,15 @@ private:
     // destroy player with identifer 'identifier'
     void despawn_player(unsigned int identifier);
 
+    unsigned int _next_monster_identifier;
+    void spawn_monster(unsigned int identifier);
+    void despawn_monster(unsigned int identifier);
+
     float _update_timer;
     World _world;
     std::vector<Entity> _entities;
     std::vector<PlayerController> _players;
+    std::vector<AIController> _monster;
 	
 public:
     enum {MAX_SERIALIZE_SIZE = PlayerViewType::MAX_SERIALIZE_SIZE};

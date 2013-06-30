@@ -46,6 +46,9 @@
 #define TILE_GUY			0x00
 #define TILE_GUY_SIDE       0x02
 #define TILE_GUY_BACK		0x01
+#define TILE_MONSTER		0x20
+#define TILE_MONSTER_SIDE   0x22
+#define TILE_MONSTER_BACK   0x21
 #define TILE_ARROW_UP		0xC0
 #define TILE_CHECKER		0x1E
 #define TILE_STAIRS			0x1F

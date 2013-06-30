@@ -47,14 +47,15 @@ private:
 
 public:
     PlayerController(unsigned int identifier, const Entity& entity);
+    ~PlayerController();
     void update(const World& world, std::vector<Entity>& entities);
     void draw(const World& world, std::vector<Entity>& entities);
     void handle_input();
-    int x() const;
+    /*int x() const;
     int y() const;
     int z() const;
     unsigned char symbol() const;
-    unsigned char color() const;
+    unsigned char color() const;*/
     const Entity& entity() const;
 
     PlayerViewType& view();

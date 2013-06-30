@@ -13,7 +13,8 @@ void GameServer::despawn_player(unsigned int identifier) {
         }
     }
     if (player != _players.end()) {
-        Entity player_entity = player->entity();
+        std::cout << "player dead!" << std::endl;
+        //Entity player_entity = player->entity();
         _players.erase(player);
         // delete the entity
         /*std::vector<Entity>::iterator it;
@@ -27,11 +28,31 @@ void GameServer::despawn_player(unsigned int identifier) {
     }
 }
 
+void GameServer::spawn_monster(unsigned int identifier) {
+    _entities.push_back(Entity(rand() % _world.width(), rand() % _world.height(), 0, TILE_MONSTER, false, false, COLOR_BLACK, _world));
+    _monster.push_back(AIController(identifier, _entities.back()));
+}
+
+void GameServer::despawn_monster(unsigned int identifier) {
+    std::vector<AIController>::iterator monster;
+    for (monster = _monster.begin(); monster != _monster.end(); ++monster) {
+        if (monster->identifier() == identifier) {
+            break;
+        }
+    }
+    if (monster != _monster.end()) {
+        std::cout << "monster dead!" << std::endl;
+        //Entity player_entity = player->entity();
+        _monster.erase(monster);
+    }
+}
+
 GameServer::GameServer()
-    : _update_timer(0.0f), _world(128, 128, 128) {
+    : _next_monster_identifier(0), _update_timer(0.0f), _world(128, 128, 128) {
     // spawn chests
     for (unsigned int i = 0; i < 100; ++i) {
-        _entities.push_back(Entity(rand() % _world.width(), rand() % _world.height(), 0, TILE_CHEST, false, false, COLOR_CHEST, _world));
+        //_entities.push_back(Entity(rand() % _world.width(), rand() % _world.height(), 0, TILE_CHEST, false, false, COLOR_CHEST, _world));
+        spawn_monster(_next_monster_identifier++);
     }
 }
 
@@ -48,20 +69,46 @@ void GameServer::update(float dt) {
         while (!done) {
             std::vector<Entity>::iterator it;
             for (it = _entities.begin(); it != _entities.end(); ++it) {
-                if (it->health() == 0) break;
+                if (it->health() == 0) {
+                    // is this a player entity?
+                    for (unsigned int i = 0; i < _players.size(); ++i) {
+                        if (*it == _players[i].entity()) {
+                            despawn_player(_players[i].identifier());
+                            break;
+                        }
+                    }
+
+                    // is this a monster entity?
+                    for (unsigned int i = 0; i < _monster.size(); ++i) {
+                        if (*it == _monster[i].entity()) {
+                            despawn_monster(_monster[i].identifier());
+                            break;
+                        }
+                    }
+
+                    it->clear_damages();
+                    it->set_symbol(TILE_CHEST, false, false);
+
+                    bool remove = true;
+                    if (it->inventory_locked()) {
+                        remove = false;
+                    } else {
+                        for (unsigned int i = 0; i < 8; ++i) {
+                            if ((it->inventory())[i] != ITEM_NONE) remove = false;
+                        }
+                    }
+                    if (remove) break;
+                }
             }
             if (it == _entities.end()) {
                 done = true;
             } else {
-                // is this a player entity?
-                for (unsigned int i = 0; i < _players.size(); ++i) {
-                    if (*it == _players[i].entity()) {
-                        despawn_player(_players[i].identifier());
-                        break;
-                    }
-                }
                 _entities.erase(it);
             }
+        }
+
+        for (unsigned int i = 0; i < _monster.size(); ++i) {
+            _monster[i].update(_world, _entities);
         }
 
         for (unsigned int i = 0; i < _players.size(); ++i) {

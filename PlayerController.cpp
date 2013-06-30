@@ -52,9 +52,9 @@ void PlayerController::draw_health_bar(unsigned int x, unsigned int y) {
 }
 
 void PlayerController::create_world_view(const World& world, std::vector<Entity>& entities) {
-    const int position_x = x();
-    const int position_y = y();
-    const int position_z = z();
+    const int position_x = _entity.x();
+    const int position_y = _entity.y();
+    const int position_z = _entity.z();
 
     for (unsigned int y = 0; y < ViewHeight; ++y) {
         for (unsigned int x = 0; x < ViewWidth; ++x) {
@@ -328,6 +328,10 @@ PlayerController::PlayerController(unsigned int identifier, const Entity& entity
     _deal_damage = false;
 }
 
+PlayerController::~PlayerController() {
+    _entity.unlock_inventory();
+}
+
 void PlayerController::update(const World& world, std::vector<Entity>& entities) {
     // update the entity (like falling)
     //_entity.update(world, entities);
@@ -511,11 +515,11 @@ void PlayerController::handle_input() {
     }
 }
 
-int PlayerController::x() const {return _entity.x();}
+/*int PlayerController::x() const {return _entity.x();}
 int PlayerController::y() const {return _entity.y();}
 int PlayerController::z() const {return _entity.z();}
 unsigned char PlayerController::symbol() const {return _entity.symbol();}
-unsigned char PlayerController::color() const {return _entity.color();}
+unsigned char PlayerController::color() const {return _entity.color();}*/
 const Entity& PlayerController::entity() const {
     return _entity;
 }

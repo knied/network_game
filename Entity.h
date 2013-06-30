@@ -1,3 +1,6 @@
+#ifndef ENTITY_H_
+#define ENTITY_H_
+
 #include "defines.h"
 #include "World.h"
 
@@ -65,3 +68,5 @@ public:
     bool deals_damage_at(int x, int y, int z) const;
 
 };
+
+#endif
