@@ -1,18 +1,33 @@
 #include "Entity.h"
 
-Entity::Entity(int x, int y, int z, unsigned char symbol, unsigned char color, const World& world)
-    : _symbol(symbol), _color(color), _x(x), _y(y), _z(z) {
+Entity::Entity(int x, int y, int z, unsigned char symbol, bool flip_x, bool flip_y, unsigned char color, const World& world)
+    : _data(new Data()) {
+    _data->symbol = symbol;
+    _data->flip_x = flip_x;
+    _data->flip_y = flip_y;
+    _data->color = color;
+    _data->x = x;
+    _data->y = y;
+    _data->z = z;
+    _data->colliding = true;
+    _data->references = 1;
+    _data->inventory_locked = false;
+    for (unsigned int i = 0; i < 8; ++i) {
+        _data->inventory[i] = ITEM_NONE;
+    }
+    _data->health = 5;
+
     if (world.at(x, y, z) != BLOCK_VOID) {
         // find the surface and place the entity on top of it
         for (int i = z; i < world.depth(); ++i) {
-            _z = i;
+            _data->z = i;
             if (world.at(x, y, i) == BLOCK_VOID) {
                 break;
             }
         }
     } else if (world.at(x, y, z - 1) == BLOCK_VOID) {
         for (int i = z - 1; i >= 0; --i) {
-            _z = i;
+            _data->z = i;
             if (world.at(x, y, i-1) != BLOCK_VOID) {
                 break;
             }
@@ -21,101 +36,182 @@ Entity::Entity(int x, int y, int z, unsigned char symbol, unsigned char color, c
 
 }
 
-void Entity::update(const World& world) {
-    // are we falling?
-    if (world.at(_x, _y, _z - 1) == BLOCK_VOID && world.at(_x, _y, _z) != BLOCK_LADDER) {
-        // we are!
-        _z--;
-    }
+Entity::Entity(const Entity& entity)
+    : _data(entity._data) {
+    _data->references++;
+}
 
-    if (_z < 0) {
-        _z = 0;
-    }
-    if (_z >= world.depth()) {
-        _z = world.depth() - 1;
+Entity::~Entity() {
+    _data->references--;
+    if (_data->references == 0) {
+        delete _data;
     }
 }
 
-void Entity::move(int dx, int dy, int dz, const World& world) {
-    int new_position_x = _x + dx;
-    int new_position_y = _y + dy;
-    int new_position_z = _z + dz;
+const Entity& Entity::operator = (const Entity& entity) {
+    _data->references--;
+    if (_data->references == 0) {
+        delete _data;
+    }
+    _data = entity._data;
+    _data->references++;
 
-    if (new_position_x < 0) {
-        new_position_x = 0;
-    }
-    if (new_position_x >= world.width()) {
-        new_position_x = world.width() - 1;
+    return *this;
+}
+
+bool Entity::operator == (const Entity& entity) const {
+    return _data == entity._data;
+}
+
+bool Entity::operator != (const Entity& entity) const {
+    return _data != entity._data;
+}
+
+void Entity::update(const World& world, const std::vector<Entity>& entities) {
+    unsigned int collider = 0;
+    if (world.at(_data->x, _data->y, _data->z) != BLOCK_LADDER &&
+        world.at(_data->x, _data->y, _data->z - 1) != BLOCK_LADDER &&
+        NoCollision == can_move_to(_data->x, _data->y, _data->z - 1, world, entities, collider)) {
+        _data->z--; // fall down
     }
 
-    if (new_position_y < 0) {
-        new_position_y = 0;
+    if (_data->z < 0) {
+        _data->z = 0;
     }
-    if (new_position_y >= world.height()) {
-        new_position_y = world.height() - 1;
-    }
-
-    if (new_position_z < 0) {
-        new_position_z = 0;
-    }
-    if (new_position_z >= world.depth()) {
-        new_position_z = world.depth() - 1;
+    if (_data->z >= world.depth()) {
+        _data->z = world.depth() - 1;
     }
 
-    // handle movement on the same level
-    if (world.at(new_position_x, new_position_y, _z) != BLOCK_VOID &&
-        world.at(new_position_x, new_position_y, _z) != BLOCK_LADDER) {
-        // blocked, can we go up?
-        if (world.at(_x, _y, _z) != BLOCK_LADDER)
-        {
-            new_position_z = _z + 1;
-            if (world.at(new_position_x, new_position_y, _z + 1) != BLOCK_VOID &&
-                world.at(new_position_x, new_position_y, _z + 1) != BLOCK_LADDER) {
-                // collision -> do not move
-                new_position_x = _x;
-                new_position_y = _y;
+    for (unsigned int i = 0; i < entities.size(); ++i) {
+        if (entities[i].deals_damage_at(_data->x, _data->y, _data->z)) hurt();
+    }
+}
+
+Entity::Collision Entity::can_move_to(int x, int y, int z, const World& world, const std::vector<Entity>& entities, unsigned int& collider) const {
+    if (x < 0 || x >= world.width()) return WorldCollision;
+    if (y < 0 || y >= world.height()) return WorldCollision;
+    if (z < 0 || z >= world.depth()) return WorldCollision;
+
+    if (world.at(x, y, z) != BLOCK_VOID && world.at(x, y, z) != BLOCK_LADDER) return WorldCollision;
+
+    if (_data->colliding) {
+        for (unsigned int i = 0; i < entities.size(); ++i) {
+            if (entities[i] != *this && entities[i].colliding()) {
+                if (entities[i].x() == x && entities[i].y() == y && entities[i].z() == z) {
+                    //std::cout << "collision" << std::endl;
+                    collider = i;
+                    return EntityCollision;
+                }
             }
-        } else {
-            // collision -> do not move
-            new_position_x = _x;
-            new_position_y = _y;
         }
     }
 
-    // handle movement in vertical direction
-    if (world.at(new_position_x, new_position_y, new_position_z) != BLOCK_VOID &&
-        world.at(new_position_x, new_position_y, new_position_z) != BLOCK_LADDER) {
-        new_position_z = _z;
-    }
+    return NoCollision;
+}
 
-    _x = new_position_x;
-    _y = new_position_y;
-    _z = new_position_z;
+void Entity::move(int dx, int dy, int dz, const World& world, const std::vector<Entity>& entities) {
+    int new_position_x = _data->x + dx;
+    int new_position_y = _data->y + dy;
+    int new_position_z = _data->z + dz;
 
-    if (_z < 0) {
-        _z = 0;
+    unsigned int collider = 0;
+    Collision c = can_move_to(new_position_x, new_position_y, new_position_z, world, entities, collider);
+    if (c == NoCollision) {
+        _data->x = new_position_x;
+        _data->y = new_position_y;
+        _data->z = new_position_z;
+    } else if (c == WorldCollision &&
+               world.at(_data->x, _data->y, _data->z) != BLOCK_LADDER &&
+               NoCollision == can_move_to(new_position_x, new_position_y, new_position_z + 1, world, entities, collider)) {
+        _data->x = new_position_x;
+        _data->y = new_position_y;
+        _data->z = new_position_z + 1;
+    } else {
+        // TODO: Entity collision. Try to push the entity
     }
-    if (_z >= world.depth()) {
-        _z = world.depth() - 1;
-    }
+}
+
+void Entity::heal() {
+    if (_data->health < 5) _data->health++;
+}
+void Entity::hurt() {
+    if (_data->health > 0) _data->health--;
+}
+
+void Entity::set_colliding(bool colliding) {
+    _data->colliding = colliding;
+}
+
+void Entity::set_symbol(unsigned char symbol, bool flip_x, bool flip_y) {
+    _data->symbol = symbol;
+    _data->flip_x = flip_x;
+    _data->flip_y = flip_y;
+}
+
+void Entity::lock_inventory() {
+    _data->inventory_locked = true;
+}
+
+void Entity::unlock_inventory() {
+    _data->inventory_locked = false;
+}
+
+void Entity::deal_damage(int x, int y, int z) {
+    Data::DamagePosition damage = {x, y, z};
+    _data->damages.push_back(damage);
+}
+
+void Entity::clear_damages() {
+    _data->damages.clear();
 }
 
 unsigned char Entity::symbol() const {
-    return _symbol;
+    return _data->symbol;
+}
+
+bool Entity::flip_x() const {
+    return _data->flip_x;
+}
+
+bool Entity::flip_y() const {
+    return _data->flip_y;
 }
 
 unsigned char Entity::color() const {
-    return _color;
+    return _data->color;
 }
 
 int Entity::x() const {
-    return _x;
+    return _data->x;
 }
 
 int Entity::y() const {
-    return _y;
+    return _data->y;
 }
 
 int Entity::z() const {
-    return _z;
+    return _data->z;
+}
+
+unsigned char* Entity::inventory() {
+    return _data->inventory;
+}
+
+unsigned int Entity::health() const {
+    return _data->health;
+}
+
+bool Entity::colliding() const {
+    return _data->colliding;
+}
+
+bool Entity::inventory_locked() const {
+    return _data->inventory_locked;
+}
+
+bool Entity::deals_damage_at(int x, int y, int z) const {
+    for (unsigned int i = 0; i < _data->damages.size(); ++i) {
+        if (_data->damages[i].x == x && _data->damages[i].y == y && _data->damages[i].z == z) return true;
+    }
+    return false;
 }

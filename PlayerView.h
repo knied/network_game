@@ -2,6 +2,8 @@
 #define __network_game__PlayerView__
 
 #include <iostream>
+#include <string>
+#include "defines.h"
 
 template<unsigned int ViewWidth, unsigned int ViewHeight>
 class PlayerView {
@@ -40,6 +42,61 @@ public:
     }
     void set_symbol_color(unsigned int x, unsigned int y, unsigned char symbol_color) {
         _pixels[y * ViewWidth + x].symbol_color = symbol_color;   
+    }
+    void set_text(unsigned int x, unsigned int y, const std::string& text, unsigned char background_color, unsigned char text_color) {
+        unsigned int cursor_x = x;
+        unsigned int cursor_y = y;
+        unsigned int cursor_text = 0;
+        while (cursor_x < ViewWidth && cursor_y < ViewHeight && cursor_text < text.length()) {
+            char c = text[cursor_text++];
+            set_background_color(cursor_x, cursor_y, background_color);
+            set_symbol_color(cursor_x, cursor_y, text_color);
+            switch (c) {
+                case 'a': case 'A': set_symbol(cursor_x, cursor_y, TILE_A, false, false); break;
+                case 'b': case 'B': set_symbol(cursor_x, cursor_y, TILE_B, false, false); break;
+                case 'c': case 'C': set_symbol(cursor_x, cursor_y, TILE_C, false, false); break;
+                case 'd': case 'D': set_symbol(cursor_x, cursor_y, TILE_D, false, false); break;
+                case 'e': case 'E': set_symbol(cursor_x, cursor_y, TILE_E, false, false); break;
+                case 'f': case 'F': set_symbol(cursor_x, cursor_y, TILE_F, false, false); break;
+                case 'g': case 'G': set_symbol(cursor_x, cursor_y, TILE_G, false, false); break;
+                case 'h': case 'H': set_symbol(cursor_x, cursor_y, TILE_H, false, false); break;
+                case 'i': case 'I': set_symbol(cursor_x, cursor_y, TILE_I, false, false); break;
+                case 'j': case 'J': set_symbol(cursor_x, cursor_y, TILE_J, false, false); break;
+                case 'k': case 'K': set_symbol(cursor_x, cursor_y, TILE_K, false, false); break;
+                case 'l': case 'L': set_symbol(cursor_x, cursor_y, TILE_L, false, false); break;
+                case 'm': case 'M': set_symbol(cursor_x, cursor_y, TILE_M, false, false); break;
+                case 'n': case 'N': set_symbol(cursor_x, cursor_y, TILE_N, false, false); break;
+                case 'o': case 'O': set_symbol(cursor_x, cursor_y, TILE_O, false, false); break;
+                case 'p': case 'P': set_symbol(cursor_x, cursor_y, TILE_P, false, false); break;
+                case 'q': case 'Q': set_symbol(cursor_x, cursor_y, TILE_Q, false, false); break;
+                case 'r': case 'R': set_symbol(cursor_x, cursor_y, TILE_R, false, false); break;
+                case 's': case 'S': set_symbol(cursor_x, cursor_y, TILE_S, false, false); break;
+                case 't': case 'T': set_symbol(cursor_x, cursor_y, TILE_T, false, false); break;
+                case 'u': case 'U': set_symbol(cursor_x, cursor_y, TILE_U, false, false); break;
+                case 'v': case 'V': set_symbol(cursor_x, cursor_y, TILE_V, false, false); break;
+                case 'w': case 'W': set_symbol(cursor_x, cursor_y, TILE_W, false, false); break;
+                case 'x': case 'X': set_symbol(cursor_x, cursor_y, TILE_X, false, false); break;
+                case 'y': case 'Y': set_symbol(cursor_x, cursor_y, TILE_Y, false, false); break;
+                case 'z': case 'Z': set_symbol(cursor_x, cursor_y, TILE_Z, false, false); break;
+                case ' ': set_symbol(cursor_x, cursor_y, TILE_NONE, false, false); break;
+                case '.': set_symbol(cursor_x, cursor_y, TILE_PERIOD, false, false); break;
+                case '-': set_symbol(cursor_x, cursor_y, TILE_HYPHEN, false, false); break;
+                case '+': set_symbol(cursor_x, cursor_y, TILE_PLUS, false, false); break;
+                case ':': set_symbol(cursor_x, cursor_y, TILE_COLON, false, false); break;
+                case '0': set_symbol(cursor_x, cursor_y, TILE_0, false, false); break;
+                case '1': set_symbol(cursor_x, cursor_y, TILE_1, false, false); break;
+                case '2': set_symbol(cursor_x, cursor_y, TILE_2, false, false); break;
+                case '3': set_symbol(cursor_x, cursor_y, TILE_3, false, false); break;
+                case '4': set_symbol(cursor_x, cursor_y, TILE_4, false, false); break;
+                case '5': set_symbol(cursor_x, cursor_y, TILE_5, false, false); break;
+                case '6': set_symbol(cursor_x, cursor_y, TILE_6, false, false); break;
+                case '7': set_symbol(cursor_x, cursor_y, TILE_7, false, false); break;
+                case '8': set_symbol(cursor_x, cursor_y, TILE_8, false, false); break;
+                case '9': set_symbol(cursor_x, cursor_y, TILE_9, false, false); break;
+                default: set_symbol(cursor_x, cursor_y, TILE_NONE, false, false); break;
+            }
+            cursor_x++;
+        }
     }
 
     unsigned char symbol(unsigned int x, unsigned int y) const {

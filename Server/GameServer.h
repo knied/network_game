@@ -15,10 +15,14 @@ private:
     typedef PlayerView<ViewWidth, ViewHeight> PlayerViewType;
     typedef PlayerInput PlayerInputType;
 
+    // creates a new player with identifier 'identifier'
     void spawn_player(unsigned int identifier);
+    // destroy player with identifer 'identifier'
+    void despawn_player(unsigned int identifier);
 
     float _update_timer;
     World _world;
+    std::vector<Entity> _entities;
     std::vector<PlayerController> _players;
 	
 public:

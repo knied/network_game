@@ -18,6 +18,8 @@ GameClient::GameClient() {
     _colors[COLOR_LIGHT_GRAY] = Color(200, 200, 200, 255);
     _colors[COLOR_DARK_GRAY] = Color(127, 127, 127, 255);
     _colors[COLOR_PLAYER0] = Color(200, 80, 80, 255);
+    _colors[COLOR_RED] = Color(200, 0, 0, 255);
+    _colors[COLOR_CHEST] = Color(200, 128, 50, 255);
 }
 
 void GameClient::update(float dt) {

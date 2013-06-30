@@ -355,6 +355,8 @@ void GameView::keyPressEvent(QKeyEvent *event)
         case Qt::Key_A: _game.key_down(KEY_A); break;
         case Qt::Key_S: _game.key_down(KEY_S); break;
         case Qt::Key_D: _game.key_down(KEY_D); break;
+        case Qt::Key_I: _game.key_down(KEY_I); break;
+        case Qt::Key_Space: _game.key_down(KEY_SPACE); break;
         default: QGLWidget::keyPressEvent(event);
     }
 }
@@ -371,6 +373,8 @@ void GameView::keyReleaseEvent(QKeyEvent *event) {
         case Qt::Key_A: _game.key_up(KEY_A); break;
         case Qt::Key_S: _game.key_up(KEY_S); break;
         case Qt::Key_D: _game.key_up(KEY_D); break;
+        case Qt::Key_I: _game.key_up(KEY_I); break;
+        case Qt::Key_Space: _game.key_up(KEY_SPACE); break;
         default: QGLWidget::keyPressEvent(event);
     }
 }
