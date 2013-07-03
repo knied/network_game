@@ -4,7 +4,6 @@ Connection::Connection()
     : _seqNo(0x0),
       _ackNo(0x0),
       _prevAcks(0xFFFFFFFF) {
-    std::cout << "Connection constructor called!" << std::endl; // DELETE
 }
 
 bool Connection::IsRecent(unsigned int newSeqNo) {
@@ -114,7 +113,6 @@ bool Connection::ExtractBody(const unsigned char* packet, const unsigned int pac
         }
 #ifdef DEBUG
         std::cout << " (recent)" << std::endl
-                  << "Current ACK Number: " << _ackNo << std::endl
                   << (distance - 1) << " packets were skipped." << std::endl;
 #endif
         // Adjust previous Acks

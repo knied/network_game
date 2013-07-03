@@ -5,11 +5,16 @@
 #include "../Network.h"
 #include "../defines.h"
 
+// DELETE
+#include <iostream>
+
 class NetworkClient {
 private:
     Connection _connection;
     Socket _socket;
     Address _serverAddress;
+
+    float _sendTimer;
 
 public:
     NetworkClient();
@@ -28,14 +33,20 @@ public:
         unsigned int sndPacketSize;
         unsigned int sndStateSize;
 
+        // Update timer
+        _sendTimer += dt;
+
         /*
         ** Receive packet
         */
+
         Address sender;
         rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE);
 
         // Packet received?
         if (rcvPacketSize > 0) {
+            std::cout << "rcvPacketSize = " << rcvPacketSize << std::endl;
+
             // Extract the body
             if (!(_connection.ExtractBody(rcvPacket, rcvPacketSize, rcvState, rcvStateSize))) {
 #ifdef DEBUG
@@ -51,13 +62,17 @@ public:
         ** Send packet
         */
 
-        // Serialize
-        state.serialize(sndState, sndStateSize);
+        if (_sendTimer > 1.0f) {
+            _sendTimer = 0;
 
-        // Add the header
-        if (_connection.BuildHeader(sndState, sndStateSize, sndPacket, sndPacketSize)) {
-            // Send the packet
-            _socket.Send(_serverAddress, sndPacket, sndPacketSize);
+            // Serialize
+            state.serialize(sndState, sndStateSize);
+
+            // Add the header
+            if (_connection.BuildHeader(sndState, sndStateSize, sndPacket, sndPacketSize)) {
+                // Send the packet
+                _socket.Send(_serverAddress, sndPacket, sndPacketSize);
+            }
         }
     }
 };

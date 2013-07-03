@@ -7,9 +7,9 @@
 #include "../VirtualConnection.h"
 #include "../defines.h"
 
-#ifdef DEBUG
+//#ifdef DEBUG //TODO: Uncomment
     #include "iostream"
-#endif
+//#endif
 
 class NetworkServer {
 private:
@@ -19,10 +19,10 @@ private:
         Connection connection;
     };
 
+    Socket _socket;
     std::vector<_Client> _clients;
     unsigned int _maxId;
-
-    Socket _socket;
+    float _sendTimer;
 
 public:
     NetworkServer();
@@ -40,18 +40,27 @@ public:
         unsigned int sndPacketSize;
         unsigned int sndStateSize;
 
+        // Update timer
+        _sendTimer += dt;
+
         /*
         ** Send a packet to all clients
         */
-        for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
-            // Serialize
-            state.serialize(sndState, sndStateSize, itClient->id);
+        if (_sendTimer += 1.0f) {
+            _sendTimer = 0;
 
-            // Build header
-            itClient->connection.BuildHeader(sndState, sndStateSize, sndPacket, sndPacketSize);
+            for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
+                // Serialize
+                state.serialize(sndState, sndStateSize, itClient->id);
 
-            // Send the packet
-            _socket.Send(itClient->address, sndPacket, sndPacketSize);
+                // Build header
+                itClient->connection.BuildHeader(sndState, sndStateSize, sndPacket, sndPacketSize);
+
+                std::cout << "sndPacketSize = " << sndPacketSize << std::endl;
+
+                // Send the packet
+                _socket.Send(itClient->address, sndPacket, sndPacketSize);
+            }
         }
 
         /*
