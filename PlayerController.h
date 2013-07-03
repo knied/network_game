@@ -92,6 +92,10 @@ private:
     void create_world_view(const World& world, std::vector<Entity>& entities);
     void create_inventory_view(std::vector<Entity>& entities);
 
+    // no copying allowed
+    PlayerController(const PlayerController&);
+    const PlayerController& operator = (const PlayerController&);
+
 public:
     PlayerController(unsigned int identifier, const Entity& entity);
     ~PlayerController();

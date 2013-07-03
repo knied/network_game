@@ -344,6 +344,9 @@ void GameView::timerEvent(QTimerEvent *event)
 
 void GameView::keyPressEvent(QKeyEvent *event)
 {
+    std::string text = event->text().toStdString();
+    std::cout << text << std::endl;
+    _game.text_input(text);
     switch (event->key()) {
         case Qt::Key_Left: _game.key_down(KEY_LEFT); break;
         case Qt::Key_Right: _game.key_down(KEY_RIGHT); break;
@@ -357,6 +360,8 @@ void GameView::keyPressEvent(QKeyEvent *event)
         case Qt::Key_D: _game.key_down(KEY_D); break;
         case Qt::Key_I: _game.key_down(KEY_I); break;
         case Qt::Key_Space: _game.key_down(KEY_SPACE); break;
+        case Qt::Key_Backspace: _game.text_delete(); break;
+        case Qt::Key_Enter: case Qt::Key_Return: _game.text_done(); break;
         default: QGLWidget::keyPressEvent(event);
     }
 }

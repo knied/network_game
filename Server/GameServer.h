@@ -6,6 +6,7 @@
 #include "../PlayerInput.h"
 #include "../PlayerController.h"
 #include "../AIController.h"
+#include "NetworkServer.h"
 
 class GameServer {
 public:
@@ -28,8 +29,10 @@ private:
     float _update_timer;
     World _world;
     std::vector<Entity> _entities;
-    std::vector<PlayerController> _players;
-    std::vector<AIController> _monster;
+    std::vector<PlayerController*> _players;
+    std::vector<AIController*> _monster;
+
+    NetworkServer _network;
 	
 public:
     enum {MAX_SERIALIZE_SIZE = PlayerViewType::MAX_SERIALIZE_SIZE};
