@@ -12,6 +12,10 @@ class AIController {
     unsigned int _identifier;
     int _timer;
 
+    // no copying allowed
+    AIController(const AIController&);
+    const AIController& operator = (const AIController&);
+
 public:
     AIController(unsigned int identifier, const Entity& entity);
     ~AIController();

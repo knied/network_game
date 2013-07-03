@@ -1,7 +1,8 @@
 #include "GameClient.h"
 #include "../defines.h"
+#include <sstream>
 
-GameClient::GameClient() {
+GameClient::GameClient() : _text_cursor_timer(0.0f) {
 	// initialize colors
     _colors[COLOR_BLACK] = Color(0, 0, 0, 255);
     _colors[COLOR_WHITE] = Color(255, 255, 255, 255);
@@ -23,24 +24,66 @@ GameClient::GameClient() {
     _colors[COLOR_GREEN] = Color(0, 200, 0, 255);
 }
 
+#ifdef DO_NETWORK
+bool GameClient::remote_name_valid() const {
+    // check if its a valid ip address
+    int a = 0;
+    int b = 0;
+    int c = 0;
+    int d = 0;
+    int p = 0;
+    int result = sscanf(_remote_name.c_str(), "%d.%d.%d.%d:%d", &a, &b, &c, &d, &p);
+    //std::cout << "result: " << result << std::endl;
+    //std::cout << a << "." << b << "." << c << "." << d << ":" << p << std::endl;
+    return result == 5;
+}
+#endif
+
+void GameClient::show_input_screen() {
+    for (unsigned int y = 0; y < ViewWidth; ++y) {
+        for (unsigned int x = 0; x < ViewWidth; ++x) {
+            _view.set_background_color(x, y, COLOR_BLACK);
+            _view.set_symbol_color(x, y, COLOR_BLACK);
+            _view.set_symbol(x, y, TILE_NONE, false, false);
+        }
+    }
+#ifdef DO_NETWORK
+    // CONNECT
+    _view.set_text(7, 20, "CONNECT TO", COLOR_BLACK, COLOR_WHITE);
+    int offset = _remote_name.length() / 2;
+    _view.set_text(12-offset, 18, _remote_name, COLOR_BLACK, remote_name_valid() ? COLOR_WHITE : COLOR_RED);
+    if (_text_cursor_timer > 0.25f) {
+        if (_text_cursor_timer > 0.5f) {
+            _text_cursor_timer = 0.0f;
+        }
+        _view.set_symbol(12 - offset + _remote_name.length(), 18, TILE_CURSOR, false, false);
+        _view.set_symbol_color(12 - offset + _remote_name.length(), 18, COLOR_WHITE);
+    }
+#endif
+}
+
 void GameClient::update(float dt) {
-    //_server_timer += dt;
-    //if (_server_timer >= 0.1f) {
-    //    _server_timer = 0.0f;
+#ifndef DO_NETWORK
     _server.update(dt);
 
-        unsigned char view_data[MAX_DESERIALIZE_SIZE];
-        unsigned int view_size = 0;
-        _server.serialize(view_data, view_size, 0);
-        deserialize(view_data, view_size);
+    // simulate network communication
+    unsigned char view_data[MAX_DESERIALIZE_SIZE];
+    unsigned int view_size = 0;
+    _server.serialize(view_data, view_size, 0);
+    deserialize(view_data, view_size);
 
-        unsigned char input_data[MAX_SERIALIZE_SIZE];
-        unsigned int input_size = 0;
-        serialize(input_data, input_size);
-        _server.deserialize(input_data, input_size, 0);
+    unsigned char input_data[MAX_SERIALIZE_SIZE];
+    unsigned int input_size = 0;
+    serialize(input_data, input_size);
+    _server.deserialize(input_data, input_size, 0);
+#else
+    //_network.update(dt, *this);
+    //if (!_network.is_connected()) {
+        // allow the user to input an ip address
+        _text_cursor_timer+=dt;
+        show_input_screen();
     //}
-
-	// TODO: network stuff
+#endif
 }
 
 const GameClient::PlayerViewType& GameClient::player_view() const {
@@ -49,6 +92,43 @@ const GameClient::PlayerViewType& GameClient::player_view() const {
 
 const Color& GameClient::color(unsigned char color_code) const {
 	return _colors[color_code];
+}
+
+void GameClient::text_input(const std::string& text) {
+#ifdef DO_NETWORK
+    // xxx.xxx.xxx.xxx:xxxxx
+    if (_remote_name.length() >= 21) return;
+    std::string allowed_characters = "0123456789.:";
+    for (unsigned int i = 0; i < allowed_characters.size(); ++i) {
+        if (text == allowed_characters.substr(i,1)) {
+            _remote_name += text;
+            return;
+        }
+    }
+#endif
+}
+
+void GameClient::text_delete() {
+#ifdef DO_NETWORK
+    if (_remote_name.length() == 0) return;
+    _remote_name = _remote_name.substr(0,_remote_name.length()-1);
+#endif
+}
+
+void GameClient::text_done() {
+#ifdef DO_NETWORK
+    int a = 0;
+    int b = 0;
+    int c = 0;
+    int d = 0;
+    int p = 0;
+    int result = sscanf(_remote_name.c_str(), "%d.%d.%d.%d:%d", &a, &b, &c, &d, &p);
+    if (result == 5) {
+        std::stringstream address_stream;
+        address_stream << a << "." << b << "." << c << "." << d << ":" << p;
+        std::cout << "connect to: " << address_stream.str() << std::endl;
+    }
+#endif
 }
 
 void GameClient::key_down(unsigned char key) {

@@ -89,21 +89,23 @@
 #define TILE_Y              0xF8
 #define TILE_Z              0xF9
 
-#define TILE_0              0xD0
-#define TILE_1              0xD1
-#define TILE_2              0xD2
-#define TILE_3              0xD3
-#define TILE_4              0xD4
-#define TILE_5              0xD5
-#define TILE_6              0xD6
-#define TILE_7              0xD7
-#define TILE_8              0xD8
-#define TILE_9              0xD9
+#define TILE_0              0xD9
+#define TILE_1              0xD0
+#define TILE_2              0xD1
+#define TILE_3              0xD2
+#define TILE_4              0xD3
+#define TILE_5              0xD4
+#define TILE_6              0xD5
+#define TILE_7              0xD6
+#define TILE_8              0xD7
+#define TILE_9              0xD8
 
 #define TILE_PERIOD         0xDA
 #define TILE_HYPHEN         0xFB
 #define TILE_COLON          0xFF
 #define TILE_PLUS           0xFA
+
+#define TILE_CURSOR         0xDB
 
 // Frame Tiles
 #define TILE_FRAME_LR       0x30
