@@ -10,6 +10,9 @@ SOURCES += main.cpp GameServer.cpp \
     ../PlayerInput.cpp \
     ../Noise2D.cpp \
     ../Network.cpp \
+    ../AIController.cpp \
+    ../PlayerController.cpp \
+    ../Entity.cpp \
     NetworkServer.cpp
 
 HEADERS += \
@@ -21,5 +24,8 @@ HEADERS += \
     ../Noise2D.h \
     ../Network.h \
     ../defines.h \
+    ../AIController.h \
+    ../PlayerController.h \
+    ../Entity.h \
     NetworkServer.h
 
