@@ -1,25 +1,85 @@
 #ifndef NETWORK_SERVER_H_
 #define NETWORK_SERVER_H_
 
+#include <vector>
+
+#include "../Network.h"
+#include "../VirtualConnection.h"
+#include "../defines.h"
+
+#ifdef DEBUG
+    #include "iostream"
+#endif
+
 class NetworkServer {
+private:
+    struct _Client{
+        unsigned int id;
+        Address address;
+        Connection connection;
+    };
+
+    std::vector<_Client> _clients;
+    unsigned int _maxId;
+
+    Socket _socket;
+
+    char _packetBuffer[NET_MAX_PACKET_SIZE];
+    unsigned int _packetSize;
+    char _bodyBuffer[NET_MAX_BODY_SIZE];
+    unsigned int _bodySize;
+
 public:
-    NetworkServer() {}
+    NetworkServer();
+    ~NetworkServer();
 
     template<class State>
     void update(float dt, State& state) {
-        // A unique identifier for each player (do not reuse identifiers of disconnected players)
-        unsigned int player_identifier = 42;
+        /*
+        ** Send a packet to all clients
+        */
+        for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
+            // Serialize
+            state.serialize(_bodyBuffer, _bodySize, itClient->id);
 
-        // To serialize the state:
-        unsigned char state_data[State::MAX_SERIALIZE_SIZE];
-        unsigned int state_size = 0;
-        state.serialize(state_data, state_size, player_identifier);
+            // Build header
+            itClient->connection.BuildHeader(_bodyBuffer, _bodySize, _packetBuffer, _packetSize);
 
-        // To deserialize a state update:
-        unsigned char new_state_data[State::MAX_DESERIALIZE_SIZE];
-        unsigned int new_state_size = 0;
-        // TODO: fill the array and update the size (from a network packet)
-        state.deserialize(new_state_data, new_state_size, player_identifier);
+            // Send the packet
+            _socket.Send(itClient->address, _packetBuffer, _packetSize);
+        }
+
+        /*
+        ** Receive a packet from any client
+        */
+        _Client senderClient;
+        _socket.Receive(senderClient.address, _packetBuffer, NET_MAX_PACKET_SIZE);
+
+        // Check if client is already connected
+        bool clientFound = false;
+        for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
+            if (itClient->address == senderClient.address) {
+                // Client found
+                clientFound = true;
+
+                // Extract body
+                itClient->connection.ExtractBody(_packetBuffer, _packetSize, _bodyBuffer, _bodySize);
+
+                // Deserialize
+                state.deserialize(_bodyBuffer, _bodySize, itClient->id);
+            }
+        }
+
+        // New client?
+        if (!clientFound) {
+            senderClient.id = ++_maxId;
+
+            // Extract body
+            senderClient.connection.ExtractBody(_packetBuffer, _packetSize, _bodyBuffer, _bodySize);
+
+            // Deserialize
+            state.deserialize(_bodyBuffer, _bodySize, senderClient.id);
+        }
     }
 };
 

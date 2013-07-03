@@ -23,7 +23,9 @@ Address::Address(const std::string address, const unsigned short port)
 
     // Pick the first valid sockaddr
     memset(&_address, 0, sizeof(_address));
-    _address = *((sockaddr_storage*) res->ai_addr);
+    if (res->ai_addr != 0) {
+        _address = *((sockaddr_storage*) res->ai_addr);
+    }
 }
 
 Address::Address(const sockaddr_storage& address, const unsigned short port)
@@ -254,20 +256,24 @@ unsigned int Socket::Receive(Address& sender, void *data, int size) {
     return -1;
 }
 
+bool Address::operator ==(const Address& address) const {
+    return ((Sockaddr() == address.Sockaddr()) && (Port() == address.Port()));
+}
+
 /* DELETE */
 /*
 void testNetwork() {
     std::string msg = "Hello World!";
-    char receiveBuf[BUFFER_SIZE];
-    Address addressSelf4("127.0.0.1", PORT), sender;
-    Address addressSelf6("::1", PORT);
+    char receiveBuf[NET_MAX_BODY_SIZE];
+    Address addressSelf4("127.0.0.1", NET_PORT), sender;
+    Address addressSelf6("::1", NET_PORT);
     Socket socketSelf;
-    socketSelf.Open(PORT);
+    socketSelf.Open(NET_PORT);
     socketSelf.Send(addressSelf4, msg.c_str(), msg.size());
     sleep(1);
-    socketSelf.Receive(sender, receiveBuf, BUFFER_SIZE);
+    socketSelf.Receive(sender, receiveBuf, NET_MAX_BODY_SIZE);
     socketSelf.Send(addressSelf6, msg.c_str(), msg.size());
     sleep(1);
-    socketSelf.Receive(sender, receiveBuf, BUFFER_SIZE);
+    socketSelf.Receive(sender, receiveBuf, NET_MAX_BODY_SIZE);
 }
 */

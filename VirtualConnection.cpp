@@ -18,7 +18,7 @@ bool Connection::IsRecent(unsigned int newSeqNo) {
     return ((newSeqNo > _ackNo) || ((_ackNo - newSeqNo) > NET_MAX_SEQ_DISTANCE/2));
 }
 
-bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char* packet, int& packetSize) {
+bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char* packet, unsigned int& packetSize) {
     char *tmpPacketPtr = packet;
 
     // Verfiy the packet size
@@ -53,7 +53,7 @@ bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char
     return true;
 }
 
-bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, char* body, int& bodySize) {
+bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, char* body, unsigned int& bodySize) {
     /*
     ** Verify the packet size
     */

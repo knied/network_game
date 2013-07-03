@@ -131,14 +131,15 @@
 #define KEY_SPACE           0x0B
 
 // Networking
-#define NET_PORT                42000
-#define NET_BUFFER_SIZE         512
+#define NET_SERVER_IP       "127.0.0.1"
+#define NET_PORT            42000
+#define NET_MAX_BODY_SIZE   512
 
 // Virtual Connection
 #define NET_PROTOCOL_ID      0x42424242
 // 4Byte PROTOCOL_ID, 2Byte SEQ, 2Byte ACK, 4Byte ACK bitfield
 #define NET_HEADER_SIZE      (4 + 2 + 2 + 4)
-#define NET_MAX_PACKET_SIZE  (NET_HEADER_SIZE + NET_BUFFER_SIZE)
+#define NET_MAX_PACKET_SIZE  (NET_HEADER_SIZE + NET_MAX_BODY_SIZE)
 // Maxmium distance between two sequence numbers
 #define NET_MAX_SEQ_DISTANCE 0xFFFE // = 2^16-1 = 65.534
 

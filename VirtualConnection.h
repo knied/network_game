@@ -23,8 +23,8 @@ private:
 
 public:
     Connection();
-    bool BuildHeader(const char* body, const unsigned int bodySize, char* packet, int& packetSize);
-    bool ExtractBody(const char* packet, const unsigned int packetSize, char* body, int& bodySize);
+    bool BuildHeader(const char* body, const unsigned int bodySize, char* packet, unsigned int& packetSize);
+    bool ExtractBody(const char* packet, const unsigned int packetSize, char* body, unsigned int& bodySize);
 };
 
 #endif // VIRTUALCONNECTION_H

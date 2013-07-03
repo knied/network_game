@@ -50,7 +50,7 @@
 class Address {
 private:
     sockaddr_storage _address;
-    const unsigned short _port;
+    unsigned short _port;
 
 public:
     Address();
@@ -63,6 +63,8 @@ public:
         return _address.ss_len;
     }
     void setSockaddr(const sockaddr_storage& address) { _address = address; }
+
+    bool operator ==(const Address& address) const;
 };
 
 /*
