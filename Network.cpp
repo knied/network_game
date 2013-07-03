@@ -219,7 +219,7 @@ unsigned int Socket::Receive(Address& sender, void *data, int size) {
 #ifdef DEBUG
         std::cout << "Socket::Receive(): no open sockets" << std::endl;
 #endif
-        return -1;
+        return 0;
     }
 
     sockaddr_storage senderSockaddr;
@@ -253,11 +253,18 @@ unsigned int Socket::Receive(Address& sender, void *data, int size) {
 #ifdef DEBUG
     std::cout << "Socket::Receive(): no sockets have data to be read" << std::endl;
 #endif
-    return -1;
+    return 0;
 }
 
 bool Address::operator ==(const Address& address) const {
-    return ((Sockaddr() == address.Sockaddr()) && (Port() == address.Port()));
+    if (Port() != address.Port()) return false;
+
+    int i = 0;
+    for (; i < sizeof(Sockaddr()->sa_data); i++) {
+        if ((Sockaddr()->sa_data)[i] != (address.Sockaddr()->sa_data)[i]) return false;
+    }
+
+    return true;
 }
 
 /* DELETE */

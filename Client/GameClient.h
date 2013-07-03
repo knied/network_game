@@ -3,10 +3,13 @@
 
 #include "../PlayerView.h"
 #include "../PlayerInput.h"
-#include "../Server/GameServer.h"
 #include "NetworkClient.h"
 
-//#define DO_NETWORK
+#define DO_NETWORK
+
+#ifndef DO_NETWORK
+    #include "../Server/GameServer.h"
+#endif
 
 struct Color {
     unsigned char r, g, b, a;

@@ -4,6 +4,7 @@ Connection::Connection()
     : _seqNo(0x0),
       _ackNo(0x0),
       _prevAcks(0xFFFFFFFF) {
+    std::cout << "Connection constructor called!" << std::endl; // DELETE
 }
 
 bool Connection::IsRecent(unsigned int newSeqNo) {
@@ -18,16 +19,19 @@ bool Connection::IsRecent(unsigned int newSeqNo) {
     return ((newSeqNo > _ackNo) || ((_ackNo - newSeqNo) > NET_MAX_SEQ_DISTANCE/2));
 }
 
-bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char* packet, unsigned int& packetSize) {
-    char *tmpPacketPtr = packet;
+bool Connection::BuildHeader(const unsigned char* body, const unsigned int bodySize, unsigned char* packet, unsigned int& packetSize) {
+    unsigned char *tmpPacketPtr = packet;
 
     // Verfiy the packet size
+    packetSize = bodySize + NET_HEADER_SIZE;
+    /*
     if ((packetSize = (bodySize + NET_HEADER_SIZE)) > NET_MAX_PACKET_SIZE) {
 #ifdef DEBUG
         std::cout << "The packet size is too large (" << packetSize << ") bytes" << std::endl;
 #endif
         return false;
     }
+    */
 
     // Insert the protocol ID
     *((unsigned int*) tmpPacketPtr) = NET_PROTOCOL_ID;
@@ -53,17 +57,21 @@ bool Connection::BuildHeader(const char* body, const unsigned int bodySize, char
     return true;
 }
 
-bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, char* body, unsigned int& bodySize) {
+bool Connection::ExtractBody(const unsigned char* packet, const unsigned int packetSize, unsigned char* body, unsigned int& bodySize) {
     /*
-    ** Verify the packet size
+    ** Packet size
     */
 
+    // Verify
+    /*
     if (packetSize > NET_MAX_PACKET_SIZE) {
 #ifdef DEBUG
         std::cout << "The received packet is too large." << std::endl;
 #endif
         return false;
     }
+    */
+
     // Size of received body
     bodySize = packetSize - NET_HEADER_SIZE;
 #ifdef DEBUG
@@ -79,7 +87,7 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
     // Does it match?
     if (receivedProtocolID != NET_PROTOCOL_ID) {
 #ifdef DEBUG
-        std::cout << "The received protocol ID does not match.";
+        std::cout << "The received protocol ID does not match." << std::endl;
 #endif
         return false;
     }
@@ -106,6 +114,7 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
         }
 #ifdef DEBUG
         std::cout << " (recent)" << std::endl
+                  << "Current ACK Number: " << _ackNo << std::endl
                   << (distance - 1) << " packets were skipped." << std::endl;
 #endif
         // Adjust previous Acks
@@ -147,7 +156,7 @@ bool Connection::ExtractBody(const char* packet, const unsigned int packetSize, 
     ** Extract the body
     */
 
-    for (int it = 0; it < bodySize; it++ ) body[it] = packet[it];
+    for (unsigned int it = 0; it < bodySize; it++ ) body[it] = packet[it];
 
     return true;
 }

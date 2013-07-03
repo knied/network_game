@@ -11,11 +11,6 @@ private:
     Socket _socket;
     Address _serverAddress;
 
-    char _packetBuffer[NET_MAX_PACKET_SIZE];
-    unsigned int _packetSize;
-    char _bodyBuffer[NET_MAX_BODY_SIZE];
-    unsigned int _bodySize;
-
 public:
     NetworkClient();
     ~NetworkClient();
@@ -23,24 +18,33 @@ public:
 
     template<class State>
     void update(float dt, State& state) {
+        unsigned char rcvPacket[State::MAX_DESERIALIZE_SIZE + NET_HEADER_SIZE];
+        unsigned char rcvState[State::MAX_DESERIALIZE_SIZE];
+        unsigned char sndPacket[State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE];
+        unsigned char sndState[State::MAX_SERIALIZE_SIZE];
+
+        unsigned int rcvPacketSize;
+        unsigned int rcvStateSize;
+        unsigned int sndPacketSize;
+        unsigned int sndStateSize;
+
         /*
         ** Receive packet
         */
-
         Address sender;
-        int numRecvdBytes = _socket.Receive(sender, _packetBuffer, NET_MAX_PACKET_SIZE);
+        rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE);
 
         // Packet received?
-        if (numRecvdBytes > 0) {
+        if (rcvPacketSize > 0) {
             // Extract the body
-            if (!(_connection.ExtractBody(_packetBuffer, numRecvdBytes, _bodyBuffer, _bodySize))) {
+            if (!(_connection.ExtractBody(rcvPacket, rcvPacketSize, rcvState, rcvStateSize))) {
 #ifdef DEBUG
                 std::cout << "Error extracting body from received packet." << std::endl;
 #endif
             }
 
             // Deserialize it
-            state.deserialize(_bodyBuffer, _bodySize);
+            state.deserialize(rcvState, rcvStateSize);
         }
 
         /*
@@ -48,12 +52,12 @@ public:
         */
 
         // Serialize
-        state.serialize(_bodyBuffer, _bodySize);
+        state.serialize(sndState, sndStateSize);
 
         // Add the header
-        if (!(_connection.BuildHeader(_bodyBuffer, _bodySize, _packetBuffer, _packetSize))) {
+        if (_connection.BuildHeader(sndState, sndStateSize, sndPacket, sndPacketSize)) {
             // Send the packet
-            _socket.Send(_serverAddress, _packetBuffer, _packetSize);
+            _socket.Send(_serverAddress, sndPacket, sndPacketSize);
         }
     }
 };

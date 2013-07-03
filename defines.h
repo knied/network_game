@@ -141,7 +141,7 @@
 #define NET_PROTOCOL_ID      0x42424242
 // 4Byte PROTOCOL_ID, 2Byte SEQ, 2Byte ACK, 4Byte ACK bitfield
 #define NET_HEADER_SIZE      (4 + 2 + 2 + 4)
-#define NET_MAX_PACKET_SIZE  (NET_HEADER_SIZE + NET_MAX_BODY_SIZE)
+// #define NET_MAX_PACKET_SIZE  (NET_HEADER_SIZE + NET_MAX_BODY_SIZE)
 // Maxmium distance between two sequence numbers
 #define NET_MAX_SEQ_DISTANCE 0xFFFE // = 2^16-1 = 65.534
 

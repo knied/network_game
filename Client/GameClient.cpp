@@ -77,11 +77,11 @@ void GameClient::update(float dt) {
     serialize(input_data, input_size);
     _server.deserialize(input_data, input_size, 0);
 #else
-    //_network.update(dt, *this);
+    _network.update(dt, *this);
     //if (!_network.is_connected()) {
         // allow the user to input an ip address
         _text_cursor_timer+=dt;
-        show_input_screen();
+        //show_input_screen();
     //}
 #endif
 }

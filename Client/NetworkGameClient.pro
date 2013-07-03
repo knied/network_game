@@ -23,7 +23,7 @@ SOURCES += main.cpp\
            ../PlayerView.cpp \
            ../PlayerInput.cpp \
            GameClient.cpp \
-    ../Server/GameServer.cpp \
+    #../Server/GameServer.cpp \
     NetworkClient.cpp \
     ../Entity.cpp \
     ../PlayerController.cpp \
@@ -39,7 +39,7 @@ HEADERS += mainwindow.h \
            ../PlayerView.h \
            ../PlayerInput.h \
            GameClient.h \
-    ../Server/GameServer.h \
+    #../Server/GameServer.h \
     NetworkClient.h \
     ../Entity.h \
     ../PlayerController.h \
