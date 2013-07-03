@@ -46,7 +46,8 @@ public:
         /*
         ** Send a packet to all clients
         */
-        if (_sendTimer += 1.0f) {
+
+        if (_sendTimer > 0.1f) {
             _sendTimer = 0;
 
             for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
@@ -66,6 +67,7 @@ public:
         /*
         ** Receive a packet from any client
         */
+
         Address sender;
         rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE);
 

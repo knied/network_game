@@ -62,7 +62,7 @@ public:
         ** Send packet
         */
 
-        if (_sendTimer > 1.0f) {
+        if (_sendTimer > 0.1f) {
             _sendTimer = 0;
 
             // Serialize
