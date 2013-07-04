@@ -41,7 +41,7 @@ public:
         */
 
         Address sender;
-        rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE);
+        rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_DESERIALIZE_SIZE + NET_HEADER_SIZE);
 
         // Packet received?
         if (rcvPacketSize > 0) {
