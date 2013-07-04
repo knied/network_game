@@ -5,9 +5,6 @@
 #include "../Network.h"
 #include "../defines.h"
 
-// DELETE
-#include <iostream>
-
 class NetworkClient {
 private:
     Connection _connection;
