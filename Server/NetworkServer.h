@@ -7,9 +7,9 @@
 #include "../VirtualConnection.h"
 #include "../defines.h"
 
-//#ifdef DEBUG //TODO: Uncomment
+#ifdef DEBUG
     #include "iostream"
-//#endif
+#endif
 
 class NetworkServer {
 private:
@@ -56,8 +56,6 @@ public:
 
                 // Build header
                 itClient->connection.BuildHeader(sndState, sndStateSize, sndPacket, sndPacketSize);
-
-                std::cout << "sndPacketSize = " << sndPacketSize << std::endl;
 
                 // Send the packet
                 _socket.Send(itClient->address, sndPacket, sndPacketSize);

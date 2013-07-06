@@ -78,7 +78,7 @@ private:
         sockaddr_storage address;
     };
 
-    std::vector<_Sock> _socketDescs; // TODO replace with vector
+    std::vector<_Sock> _socketDescs;
 
 public:
     Socket();
