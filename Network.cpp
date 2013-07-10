@@ -100,16 +100,14 @@ bool Socket::Open(const unsigned short port) {
         newSock.descriptor = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (newSock.descriptor == -1) {
             perror("socket()");
-            freeaddrinfo(srvInfo);
-            return false;
+            continue;
         }
 
         // Bind
         retVal = bind(newSock.descriptor, p->ai_addr, p->ai_addrlen);
         if (retVal == -1) {
             perror("bind()");
-            freeaddrinfo(srvInfo);
-            return false;
+            continue;
         }
 
         // Make it non-blocking
@@ -118,16 +116,14 @@ bool Socket::Open(const unsigned short port) {
         retVal = fcntl(newSock.descriptor, F_SETFL, O_NONBLOCK, nonBlocking);
         if (retVal == -1) {
             perror("fcntl()");
-            freeaddrinfo(srvInfo);
-            return false;
+            continue;
         }
 #elif PLATFORM == PLATFORM_WINDOWS
         DWORD nonBlocking = 1;
         retval = ioctlsocket(newSock.descriptor, FIONBIO, &nonBlocking);
         if (retVal != 0) {
             printf("ioctlsocket(): Error %d\n", WSAGetLastError());
-            freeaddrinfo(srvInfo);
-            return false;
+            continue;
         }
 #endif
 

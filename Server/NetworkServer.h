@@ -56,17 +56,27 @@ public:
         ** Send packets to clients
         */
 
+        std::cout << "number of itemz: " << _clients.size() << std::endl;
+        bool done = false;
+        while (!done) {
+            std::vector<_Client>::iterator itClient = _clients.begin();
+            for (; itClient != _clients.end(); itClient++) {
+                if (itClient->disconnectTimer > CON_TIMEOUT) {
+                    // Client disconnected!
+                    state.disconnect(itClient->id);
+                    break;
+                }
+            }
+            if (itClient != _clients.end()) {
+                _clients.erase(itClient);
+            } else {
+                done = true;
+            }
+        }
+
         for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
             // Update disconnection timer
-            if ((itClient->disconnectTimer += dt) > CON_TIMEOUT) {
-                // Client disconnected!
-                state.disconnect(itClient->id);
-
-                // Remove it from the list
-                _clients.erase(itClient);
-
-                continue;
-            }
+            itClient->disconnectTimer += dt;
 
             // Send
             if (_sendTimer > SND_INTERVAL) {
