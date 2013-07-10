@@ -1,6 +1,7 @@
 #include "../Entity.h"
 #include "../PlayerView.h"
 #include "../PlayerInput.h"
+#include <stdlib.h>
 
 class EntityLock {
     Entity _entity;

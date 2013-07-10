@@ -1,4 +1,5 @@
 #include "../Entity.h"
+#include <stdlib.h>
 
 class AIController {
     enum ViewDir {

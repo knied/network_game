@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <stdlib.h>
 
 #include "defines.h"
 

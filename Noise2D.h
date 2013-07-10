@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stdlib.h>
 
 class Noise2D {
     std::vector<float> _data;

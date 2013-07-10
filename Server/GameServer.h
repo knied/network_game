@@ -7,6 +7,7 @@
 #include "../PlayerController.h"
 #include "../AIController.h"
 #include "NetworkServer.h"
+#include <stdlib.h>
 
 class GameServer {
 public:
