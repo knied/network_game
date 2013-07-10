@@ -139,6 +139,10 @@ void GameClient::key_up(unsigned char key) {
 	_input.key_up(key);
 }
 
+void GameClient::disconnect() {
+    std::cout << "Disconnected by server." << std::endl;
+}
+
 void GameClient::serialize(unsigned char data[GameClient::MAX_SERIALIZE_SIZE], unsigned int& size) {
 	_input.serialize(data, size);
 	// Input events have been sent to the server. Make room for new events.

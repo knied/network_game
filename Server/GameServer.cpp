@@ -129,6 +129,10 @@ void GameServer::update(float dt) {
     _network.update(dt, *this);
 }
 
+void GameServer::disconnect(unsigned int player_identifier) {
+    std::cout << "Player " << player_identifier << " disconnected." << std::endl;
+}
+
 void GameServer::serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int& size, unsigned int player_identifier) {
     std::vector<PlayerController*>::iterator it;
     for (it = _players.begin(); it != _players.end(); ++it) {

@@ -345,7 +345,7 @@ void GameView::timerEvent(QTimerEvent *event)
 void GameView::keyPressEvent(QKeyEvent *event)
 {
     std::string text = event->text().toStdString();
-    std::cout << text << std::endl;
+    //std::cout << text << std::endl;
     _game.text_input(text);
     switch (event->key()) {
         case Qt::Key_Left: _game.key_down(KEY_LEFT); break;

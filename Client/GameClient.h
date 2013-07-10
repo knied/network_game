@@ -68,6 +68,9 @@ public:
 	void key_down(unsigned char key);
     void key_up(unsigned char key);
 
+    // Network interface:
+    // called once when disconnected from server
+    void disconnect();
     void serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int& size);
     void deserialize(const unsigned char data[MAX_DESERIALIZE_SIZE], const unsigned int size);
 

@@ -42,6 +42,7 @@ public:
 
     void update(float dt);
 
+    void disconnect(unsigned int player_identifier);
     void serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int& size, unsigned int player_identifier);
     void deserialize(const unsigned char data[MAX_DESERIALIZE_SIZE], const unsigned int size, unsigned int player_identifier);
 };
