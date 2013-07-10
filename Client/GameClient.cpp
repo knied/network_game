@@ -78,11 +78,11 @@ void GameClient::update(float dt) {
     _server.deserialize(input_data, input_size, 0);
 #else
     _network.update(dt, *this);
-    //if (!_network.is_connected()) {
+    if (!_network.is_connected()) {
         // allow the user to input an ip address
         _text_cursor_timer+=dt;
-        //show_input_screen();
-    //}
+        show_input_screen();
+    }
 #endif
 }
 
@@ -117,16 +117,19 @@ void GameClient::text_delete() {
 
 void GameClient::text_done() {
 #ifdef DO_NETWORK
-    int a = 0;
-    int b = 0;
-    int c = 0;
-    int d = 0;
-    int p = 0;
-    int result = sscanf(_remote_name.c_str(), "%d.%d.%d.%d:%d", &a, &b, &c, &d, &p);
-    if (result == 5) {
-        std::stringstream address_stream;
-        address_stream << a << "." << b << "." << c << "." << d << ":" << p;
-        std::cout << "connect to: " << address_stream.str() << std::endl;
+    if (!_network.is_connected()) {
+        int a = 0;
+        int b = 0;
+        int c = 0;
+        int d = 0;
+        int p = 0;
+        int result = sscanf(_remote_name.c_str(), "%d.%d.%d.%d:%d", &a, &b, &c, &d, &p);
+        if (result == 5) {
+            std::stringstream address_stream;
+            address_stream << a << "." << b << "." << c << "." << d;
+            std::cout << "connect to: " << address_stream.str() << " on port: " << p << std::endl;
+            _network.connect_to(Address(address_stream.str(), p));
+        }
     }
 #endif
 }
