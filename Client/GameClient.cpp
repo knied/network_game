@@ -78,7 +78,7 @@ void GameClient::update(float dt) {
     _server.deserialize(input_data, input_size, 0);
 #else
     _network.update(dt, *this);
-    if (!_network.is_connected()) {
+    if (!_network.IsConnected()) {
         // allow the user to input an ip address
         _text_cursor_timer+=dt;
         show_input_screen();
@@ -117,7 +117,7 @@ void GameClient::text_delete() {
 
 void GameClient::text_done() {
 #ifdef DO_NETWORK
-    if (!_network.is_connected()) {
+    if (!_network.IsConnected()) {
         int a = 0;
         int b = 0;
         int c = 0;
@@ -128,7 +128,7 @@ void GameClient::text_done() {
             std::stringstream address_stream;
             address_stream << a << "." << b << "." << c << "." << d;
             std::cout << "connect to: " << address_stream.str() << " on port: " << p << std::endl;
-            _network.connect_to(Address(address_stream.str(), p));
+            _network.ConnectTo(Address(address_stream.str(), p));
         }
     }
 #endif
