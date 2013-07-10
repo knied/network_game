@@ -78,7 +78,7 @@ public:
         ** Send packet
         */
 
-        if (_sendTimer > SND_INTERVAL) {
+        if ((_sendTimer > SND_INTERVAL) && (_isConnected)) {
             _sendTimer = fmod(_sendTimer, SND_INTERVAL);
 
             // Serialize
