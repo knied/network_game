@@ -56,7 +56,6 @@ public:
         ** Send packets to clients
         */
 
-        std::cout << "number of itemz: " << _clients.size() << std::endl;
         bool done = false;
         while (!done) {
             std::vector<_Client>::iterator itClient = _clients.begin();
