@@ -350,6 +350,8 @@ PlayerController::PlayerController(unsigned int identifier, const Entity& entity
 
 PlayerController::~PlayerController() {
     _entity.unlock_inventory();
+    for(unsigned int i = 0; i < 5; ++i)
+        _entity.hurt();
 }
 
 void PlayerController::update(const World& world, std::vector<Entity>& entities) {
@@ -357,7 +359,6 @@ void PlayerController::update(const World& world, std::vector<Entity>& entities)
     //_entity.update(world, entities);
 
     _entity.clear_damages();
-
     if (_switch_inventory) {
         _in_inventory = !_in_inventory;
         if (!_in_inventory) {

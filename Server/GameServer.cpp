@@ -131,6 +131,7 @@ void GameServer::update(float dt) {
 
 void GameServer::disconnect(unsigned int player_identifier) {
     std::cout << "Player " << player_identifier << " disconnected." << std::endl;
+    despawn_player(player_identifier);
 }
 
 void GameServer::serialize(unsigned char data[MAX_SERIALIZE_SIZE], unsigned int& size, unsigned int player_identifier) {
