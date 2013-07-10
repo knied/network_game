@@ -49,28 +49,26 @@ public:
         */
 
         Address sender;
-        rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_DESERIALIZE_SIZE + NET_HEADER_SIZE);
-
-        // Packet received?
-        if (rcvPacketSize > 0) {
-            // Client is connected
-            _disconnectTimer = 0;
-
-            // Extract the body
-            if (!(_connection.ExtractBody(rcvPacket, rcvPacketSize, rcvState, rcvStateSize))) {
-#ifdef DEBUG
-                std::cout << "Error extracting body from received packet." << std::endl;
-#endif
-            }
-
-            // Deserialize it
-            state.deserialize(rcvState, rcvStateSize);
-        } else {
-            // No packet received
+        if (_isConnected) {
             _disconnectTimer += dt;
             if (_disconnectTimer > CON_TIMEOUT) {
                 _isConnected = false;
                 state.disconnect();
+            }
+
+            while ((rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_DESERIALIZE_SIZE + NET_HEADER_SIZE)) > 0) {
+                // Client is connected
+                _disconnectTimer = 0;
+
+                // Extract the body
+                if (!(_connection.ExtractBody(rcvPacket, rcvPacketSize, rcvState, rcvStateSize))) {
+    #ifdef DEBUG
+                    std::cout << "Error extracting body from received packet." << std::endl;
+    #endif
+                }
+
+                // Deserialize it
+                state.deserialize(rcvState, rcvStateSize);
             }
         }
 

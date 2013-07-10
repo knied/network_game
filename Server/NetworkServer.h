@@ -65,7 +65,7 @@ public:
                 // Remove it from the list
                 _clients.erase(itClient);
 
-                break;
+                continue;
             }
 
             // Send
