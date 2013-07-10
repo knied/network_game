@@ -32,7 +32,7 @@
 #endif
 
 #include <stdio.h>
-#include <string>
+#include <string.h>
 #include <sstream>
 #include <vector>
 
@@ -61,9 +61,9 @@ public:
     const sockaddr* Sockaddr() const { return (sockaddr*) &_address; }
     socklen_t Size() const {
         if (_address.ss_family == AF_INET) {
-            return ((sockaddr_in *) &_address)->sin_len;
+            return sizeof(sockaddr_in);
         } else if (_address.ss_family == AF_INET6) {
-            return ((sockaddr_in6 *) &_address)->sin6_len;
+            return sizeof(sockaddr_in6);
         } else { return -1; }
     }
     void setSockaddr(const sockaddr_storage& address) { _address = address; }
