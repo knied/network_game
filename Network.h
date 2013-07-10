@@ -60,7 +60,11 @@ public:
     unsigned short Port() const { return _port; }
     const sockaddr* Sockaddr() const { return (sockaddr*) &_address; }
     socklen_t Size() const {
-        return _address.ss_len;
+        if (_address.ss_family == AF_INET) {
+            return ((sockaddr_in *) &_address)->sin_len;
+        } else if (_address.ss_family == AF_INET6) {
+            return ((sockaddr_in6 *) &_address)->sin6_len;
+        } else { return -1; }
     }
     void setSockaddr(const sockaddr_storage& address) { _address = address; }
 
