@@ -5,18 +5,28 @@
 #include "../Network.h"
 #include "../defines.h"
 
+#include <math.h>
+
+// Timeouts and Intervals in s
+#define CON_TIMEOUT  10.0f
+#define SND_INTERVAL 0.1f
+
 class NetworkClient {
-private:
+private:    
     Connection _connection;
     Socket _socket;
     Address _serverAddress;
 
     float _sendTimer;
+    float _disconnectTimer;
+
+    bool _isConnected;
 
 public:
     NetworkClient();
     ~NetworkClient();
-    bool IsConnected() { /*TODO*/ return true; }
+    bool IsConnected() const { return _isConnected; }
+    void ConnectTo(Address address);
 
     template<class State>
     void update(float dt, State& state) {
@@ -35,6 +45,7 @@ public:
 
         /*
         ** Receive packet
+        **   TODO: empty queue
         */
 
         Address sender;
@@ -42,7 +53,8 @@ public:
 
         // Packet received?
         if (rcvPacketSize > 0) {
-            std::cout << "rcvPacketSize = " << rcvPacketSize << std::endl;
+            // Client is connected
+            _disconnectTimer = 0;
 
             // Extract the body
             if (!(_connection.ExtractBody(rcvPacket, rcvPacketSize, rcvState, rcvStateSize))) {
@@ -53,14 +65,21 @@ public:
 
             // Deserialize it
             state.deserialize(rcvState, rcvStateSize);
+        } else {
+            // No packet received
+            _disconnectTimer += dt;
+            if (_disconnectTimer > CON_TIMEOUT) {
+                _isConnected = false;
+                state.disconnect();
+            }
         }
 
         /*
         ** Send packet
         */
 
-        if (_sendTimer > 0.1f) {
-            _sendTimer = 0;
+        if (_sendTimer > SND_INTERVAL) {
+            _sendTimer = fmod(_sendTimer, SND_INTERVAL);
 
             // Serialize
             state.serialize(sndState, sndStateSize);

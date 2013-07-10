@@ -251,7 +251,7 @@ unsigned int Socket::Receive(Address& sender, void *data, int size) {
 
     // No sockets have data to be read
 #ifdef DEBUG
-    std::cout << "Socket::Receive(): no sockets have data to be read" << std::endl;
+    // std::cout << "Socket::Receive(): no sockets have data to be read" << std::endl;
 #endif
     return 0;
 }
@@ -259,7 +259,7 @@ unsigned int Socket::Receive(Address& sender, void *data, int size) {
 bool Address::operator ==(const Address& address) const {
     if (Port() != address.Port()) return false;
 
-    int i = 0;
+    unsigned int i = 0;
     for (; i < sizeof(Sockaddr()->sa_data); i++) {
         if ((Sockaddr()->sa_data)[i] != (address.Sockaddr()->sa_data)[i]) return false;
     }

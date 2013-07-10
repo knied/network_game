@@ -7,9 +7,15 @@
 #include "../VirtualConnection.h"
 #include "../defines.h"
 
-#ifdef DEBUG
-    #include "iostream"
-#endif
+#include <math.h>
+
+//#ifdef DEBUG
+    #include <iostream>
+//#endif
+
+// Timeout and send interval in seconds
+#define CON_TIMEOUT  10.0f
+#define SND_INTERVAL 0.1f
 
 class NetworkServer {
 private:
@@ -17,11 +23,14 @@ private:
         unsigned int id;
         Address address;
         Connection connection;
+        float disconnectTimer;
     };
 
     Socket _socket;
+
     std::vector<_Client> _clients;
     unsigned int _maxId;
+
     float _sendTimer;
 
 public:
@@ -40,17 +49,25 @@ public:
         unsigned int sndPacketSize;
         unsigned int sndStateSize;
 
-        // Update timer
+        // Update timers
         _sendTimer += dt;
 
         /*
-        ** Send a packet to all clients
+        ** Send packets to clients
         */
 
-        if (_sendTimer > 0.1f) {
-            _sendTimer = 0;
+        for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
+            // Update disconnection timer
+            if ((itClient->disconnectTimer += dt) > CON_TIMEOUT) {
+                // Client disconnected!
+                state.disconnect(itClient->id);
 
-            for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
+                // Remove it from the list
+                _clients.erase(itClient);
+            }
+
+            // Send
+            if (_sendTimer > SND_INTERVAL) {
                 // Serialize
                 state.serialize(sndState, sndStateSize, itClient->id);
 
@@ -61,15 +78,15 @@ public:
                 _socket.Send(itClient->address, sndPacket, sndPacketSize);
             }
         }
+        // Update send timer
+        _sendTimer = fmod(_sendTimer, SND_INTERVAL);
 
         /*
-        ** Receive a packet from any client
+        ** Receive all queued packets
         */
 
         Address sender;
-        rcvPacketSize = _socket.Receive(sender, rcvPacket, State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE);
-
-        if (rcvPacketSize > 0) {
+        while ((rcvPacketSize = (_socket.Receive(sender, rcvPacket, State::MAX_SERIALIZE_SIZE + NET_HEADER_SIZE))) > 0) {
             // Check if client is already connected
             bool clientFound = false;
             for (std::vector<_Client>::iterator itClient = _clients.begin(); itClient != _clients.end(); itClient++) {
@@ -77,22 +94,28 @@ public:
                     // Client found
                     clientFound = true;
 
+                    // Reset disconnection timer
+                    itClient->disconnectTimer = 0;
+
                     // Extract body
                     itClient->connection.ExtractBody(rcvPacket, rcvPacketSize, rcvState, rcvStateSize);
 
                     // Deserialize
                     state.deserialize(rcvState, rcvStateSize, itClient->id);
+
+                    break;
                 }
             }
 
             // New client?
             if (!clientFound) {
-#ifdef DEBUG
+//#ifdef DEBUG
                 std::cout << "New Client!" << std::endl;
-#endif
+//#endif
                 _Client newClient;
                 newClient.address = sender;
                 newClient.id = ++_maxId;
+                newClient.disconnectTimer = 0;
                 _clients.push_back(newClient);
 
                 // Extract body
