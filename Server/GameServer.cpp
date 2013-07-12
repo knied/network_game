@@ -1,6 +1,7 @@
 #include "GameServer.h"
 
 void GameServer::spawn_player(unsigned int identifier) {
+    std::cout << "new player: " << identifier << std::endl;
     _entities.push_back(Entity(rand() % _world.width(), rand() % _world.height(), _world.depth()-1, TILE_GUY, false, false, COLOR_PLAYER0, _world));
     _players.push_back(new PlayerController(identifier, _entities.back()));
 }
@@ -30,6 +31,7 @@ void GameServer::despawn_player(unsigned int identifier) {
 }
 
 void GameServer::spawn_monster(unsigned int identifier) {
+    std::cout << "new monster: " << identifier << std::endl;
     _entities.push_back(Entity(rand() % _world.width(), rand() % _world.height(), 0, TILE_MONSTER, false, false, COLOR_BLACK, _world));
     _monster.push_back(new AIController(identifier, _entities.back()));
 }
@@ -67,6 +69,7 @@ void GameServer::update(float dt) {
             _entities[i].update(_world, _entities);
         }
 
+        // Find all Entities that died during the last game tick
         bool done = false;
         while (!done) {
             std::vector<Entity>::iterator it;
@@ -75,6 +78,7 @@ void GameServer::update(float dt) {
                     // is this a player entity?
                     for (unsigned int i = 0; i < _players.size(); ++i) {
                         if (*it == _players[i]->entity()) {
+                            // this was a player.
                             despawn_player(_players[i]->identifier());
                             break;
                         }
@@ -83,7 +87,10 @@ void GameServer::update(float dt) {
                     // is this a monster entity?
                     for (unsigned int i = 0; i < _monster.size(); ++i) {
                         if (*it == _monster[i]->entity()) {
+                            // this was a monster
                             despawn_monster(_monster[i]->identifier());
+                            // spawn a new one, to keep the population high
+                            spawn_monster(_next_monster_identifier++);
                             break;
                         }
                     }

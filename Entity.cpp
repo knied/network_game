@@ -8,7 +8,6 @@ Entity::Entity() : _data(new Data()) {
     _data->x = 0;
     _data->y = 0;
     _data->z = 0;
-    _data->colliding = false;
     _data->references = 1;
     _data->inventory_locked = false;
     for (unsigned int i = 0; i < 8; ++i) {
@@ -26,7 +25,6 @@ Entity::Entity(int x, int y, int z, unsigned char symbol, bool flip_x, bool flip
     _data->x = x;
     _data->y = y;
     _data->z = z;
-    _data->colliding = true;
     _data->references = 1;
     _data->inventory_locked = false;
     for (unsigned int i = 0; i < 8; ++i) {
@@ -111,14 +109,11 @@ Entity::Collision Entity::can_move_to(int x, int y, int z, const World& world, c
 
     if (world.at(x, y, z) != BLOCK_VOID && world.at(x, y, z) != BLOCK_LADDER) return WorldCollision;
 
-    if (_data->colliding) {
-        for (unsigned int i = 0; i < entities.size(); ++i) {
-            if (entities[i] != *this && entities[i].colliding()) {
-                if (entities[i].x() == x && entities[i].y() == y && entities[i].z() == z) {
-                    //std::cout << "collision" << std::endl;
-                    collider = i;
-                    return EntityCollision;
-                }
+    for (unsigned int i = 0; i < entities.size(); ++i) {
+        if (entities[i] != *this) {
+            if (entities[i].x() == x && entities[i].y() == y && entities[i].z() == z) {
+                collider = i;
+                return EntityCollision;
             }
         }
     }
@@ -145,8 +140,6 @@ void Entity::move(int dx, int dy, int dz, const World& world, const std::vector<
         _data->x = new_position_x;
         _data->y = new_position_y;
         _data->z = new_position_z + 1;
-    } else {
-        // TODO: Entity collision. Try to push the entity
     }
 }
 
@@ -155,10 +148,6 @@ void Entity::heal() {
 }
 void Entity::hurt() {
     if (_data->health > 0) _data->health--;
-}
-
-void Entity::set_colliding(bool colliding) {
-    _data->colliding = colliding;
 }
 
 void Entity::set_symbol(unsigned char symbol, bool flip_x, bool flip_y) {
@@ -218,10 +207,6 @@ unsigned char* Entity::inventory() {
 
 unsigned int Entity::health() const {
     return _data->health;
-}
-
-bool Entity::colliding() const {
-    return _data->colliding;
 }
 
 bool Entity::inventory_locked() const {
