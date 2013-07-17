@@ -6,6 +6,7 @@
 #define PLAYER_INPUT_H_
 
 #include <vector>
+#include <iostream>
 
 class PlayerInput {
     enum {HEADER_SIZE = 1};
