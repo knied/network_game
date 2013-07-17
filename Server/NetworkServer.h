@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #ifndef NETWORK_SERVER_H_
 #define NETWORK_SERVER_H_
 
@@ -120,9 +122,9 @@ public:
 
             // New client?
             if (!clientFound) {
-//#ifdef DEBUG
+#ifdef DEBUG
                 std::cout << "New Client!" << std::endl;
-//#endif
+#endif
                 _Client newClient;
                 newClient.address = sender;
                 newClient.id = ++_maxId;

@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #ifndef NETWORK_CLIENT_H_
 #define NETWORK_CLIENT_H_
 

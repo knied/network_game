@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #include "NetworkServer.h"
 
 NetworkServer::NetworkServer()

@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #ifndef VIRTUALCONNECTION_H
 #define VIRTUALCONNECTION_H
 

@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #include "Network.h"
 
 Address::Address()

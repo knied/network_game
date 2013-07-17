@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #include "VirtualConnection.h"
 
 Connection::Connection()

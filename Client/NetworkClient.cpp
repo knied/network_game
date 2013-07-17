@@ -1,3 +1,5 @@
+/* Author: Maximilian Fricke */
+
 #include "NetworkClient.h"
 
 NetworkClient::NetworkClient()

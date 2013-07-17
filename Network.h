@@ -1,7 +1,4 @@
-//
-//  Network.h
-//  Platform and IP version agnostic networking
-//
+/* Author: Maximilian Fricke */
 
 #ifndef NETWORK_H
 #define NETWORK_H
@@ -90,7 +87,7 @@ public:
     bool Open(const unsigned short port);
     void Close();
     bool Send(const Address& destination, const void* data, const int size);
-    unsigned int  Receive(Address& sender, void* data, int size);
+    unsigned int Receive(Address& sender, void* data, int size);
 };
 
 /* DELETE */
