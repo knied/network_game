@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include "PlayerController.h"
 
 void PlayerController::draw_controls(unsigned int y, std::vector<Entity>& entities) {

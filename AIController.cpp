@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include "AIController.h"
 
 AIController::AIController(unsigned int identifier, const Entity& entity) : _entity(entity), _identifier(identifier) {

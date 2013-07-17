@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #ifndef GAMEVIEW_H
 #define GAMEVIEW_H
 

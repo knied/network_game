@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include <iostream>
 #include <sys/time.h>
 #include <signal.h>

@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include "GameServer.h"
 
 void GameServer::spawn_player(unsigned int identifier) {

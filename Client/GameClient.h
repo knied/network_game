@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #ifndef GAME_CLIENT_H_
 #define GAME_CLIENT_H_
 

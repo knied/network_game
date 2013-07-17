@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 

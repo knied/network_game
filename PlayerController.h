@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include "../Entity.h"
 #include "../PlayerView.h"
 #include "../PlayerInput.h"

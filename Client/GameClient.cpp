@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include "GameClient.h"
 #include "../defines.h"
 #include <sstream>

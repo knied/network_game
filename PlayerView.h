@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #ifndef __network_game__PlayerView__
 #define __network_game__PlayerView__
 

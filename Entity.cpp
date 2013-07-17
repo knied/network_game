@@ -1,3 +1,7 @@
+// =================================================================
+// Author: Kristof Niederholtmeyer
+//
+
 #include "Entity.h"
 
 Entity::Entity() : _data(new Data()) {
